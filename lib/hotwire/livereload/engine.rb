@@ -42,23 +42,23 @@ module Hotwire
       end
 
       config.after_initialize do |app|
-        return unless Rails.env.development?
-
-        @listener = Listen.to(*app.config.hotwire_livereload.listen_paths) do |modified, added, removed|
-          if modified.any? || removed.any? || added.any?
-            Hotwire::Livereload::Engine.websocket.broadcast(
-              "reload",
-              { modified: modified, removed: removed, added: added }
-            )
+        if Rails.env.development?
+          @listener = Listen.to(*app.config.hotwire_livereload.listen_paths) do |modified, added, removed|
+            if modified.any? || removed.any? || added.any?
+              Hotwire::Livereload::Engine.websocket.broadcast(
+                "reload",
+                { modified: modified, removed: removed, added: added }
+              )
+            end
           end
+          @listener.start
         end
-        @listener.start
       end
 
       at_exit do
-        return unless Rails.env.development?
-
-        @listener&.stop
+        if Rails.env.development?
+          @listener&.stop
+        end
       end
 
       class << self
