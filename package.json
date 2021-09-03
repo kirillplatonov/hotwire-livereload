@@ -1,0 +1,13 @@
+{
+  "name": "hotwire-livereload",
+  "private": "true",
+  "scripts": {
+    "build": "esbuild app/javascript/hotwire-livereload.js  --outfile=app/assets/javascripts/hotwire-livereload.js --bundle",
+    "watch": "npm run build -- --watch"
+  },
+  "dependencies": {
+    "@rails/actioncable": "^6.1.4-1",
+    "debounce": "^1.2.1",
+    "esbuild": "^0.12.25"
+  }
+}

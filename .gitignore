@@ -1,0 +1,7 @@
+/.bundle/
+/doc/
+/log/*.log
+/pkg/
+/tmp/
+.byebug_history
+/node_modules
