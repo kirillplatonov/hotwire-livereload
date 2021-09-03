@@ -35,10 +35,12 @@ module Hotwire
         config_path = Hotwire::Livereload::Engine.root.join("config", "livereload_cable.yml")
         cable = Hotwire::Livereload::Engine.cable
 
-        cable.cable = app.config_for(config_path).with_indifferent_access
-        cable.mount_path = "/cable"
-        cable.connection_class = -> { Hotwire::Livereload::Connection }
-        cable.logger ||= Rails.logger
+        if Rails.env.development?
+          cable.cable = app.config_for(config_path).with_indifferent_access
+          cable.mount_path = "/cable"
+          cable.connection_class = -> { Hotwire::Livereload::Connection }
+          cable.logger ||= Rails.logger
+        end
       end
 
       config.after_initialize do |app|
