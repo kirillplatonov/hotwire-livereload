@@ -600,20 +600,18 @@
   // app/javascript/hotwire-livereload.js
   var import_actioncable = __toModule(require_action_cable());
   var import_debounce = __toModule(require_debounce());
-  var endpoint = "/hotwire-livereload/cable";
-  var uid = (Date.now() + (Math.random() * 100 | 0)).toString();
-  var consumer = (0, import_actioncable.createConsumer)(`${endpoint}?uid=${uid}`);
+  var consumer = (0, import_actioncable.createConsumer)();
   var received = (0, import_debounce.default)(() => {
-    console.log("Hotwire::Livereload files changed");
+    console.log("[Hotwire::Livereload] Files changed");
     Turbo.visit(window.location.href);
   }, 300);
   consumer.subscriptions.create("Hotwire::Livereload::ReloadChannel", {
     received,
     connected() {
-      console.log("Hotwire::Livereload websocket connected");
+      console.log("[Hotwire::Livereload] Websocket connected");
     },
     disconnected() {
-      console.log("Hotwire::Livereload websocket disconnected");
+      console.log("[Hotwire::Livereload] Websocket disconnected");
     }
   });
 })();

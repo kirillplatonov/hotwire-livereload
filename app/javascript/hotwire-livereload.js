@@ -1,20 +1,20 @@
 import { createConsumer } from "@rails/actioncable"
 import debounce from "debounce"
 
-const endpoint = "/hotwire-livereload/cable"
-const uid = (Date.now() + ((Math.random() * 100) | 0)).toString()
-const consumer = createConsumer(`${endpoint}?uid=${uid}`)
+const consumer = createConsumer()
 const received = debounce(() => {
-  console.log("Hotwire::Livereload files changed")
+  console.log("[Hotwire::Livereload] Files changed")
   Turbo.visit(window.location.href)
 }, 300)
 
 consumer.subscriptions.create("Hotwire::Livereload::ReloadChannel", {
   received,
+
   connected() {
-    console.log("Hotwire::Livereload websocket connected")
+    console.log("[Hotwire::Livereload] Websocket connected")
   },
+
   disconnected() {
-    console.log("Hotwire::Livereload websocket disconnected")
+    console.log("[Hotwire::Livereload] Websocket disconnected")
   },
 })

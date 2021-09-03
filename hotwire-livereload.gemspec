@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.summary     = "Automatically reload Hotwire Turbo when 'view' files are modified."
   spec.license     = "MIT"
 
-  spec.files = Dir["{app,config,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
+  spec.files = Dir["{app,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
 
   spec.add_dependency "rails", ">= 6.0.0"
   spec.add_dependency "listen", ">= 3.0.0"
