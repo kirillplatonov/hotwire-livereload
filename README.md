@@ -2,7 +2,7 @@
 
 Automatically reload Hotwire Turbo when "view" files are modified.
 
-> TODO: Insert demo video
+https://user-images.githubusercontent.com/839922/131983979-afd0bcc7-86e8-4c53-9758-3bf762dbb16a.mp4
 
 ## Installation
 
