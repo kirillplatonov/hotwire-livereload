@@ -29,6 +29,10 @@ module Hotwire
         options = app.config.hotwire_livereload
         options.listen_paths = options.listen_paths.map(&:to_s)
         options.listen_paths << Rails.root.join("app/views")
+        options.listen_paths << Rails.root.join("app/helpers")
+        if Dir.exist?(Rails.root.join("app/javascript"))
+          options.listen_paths << Rails.root.join("app/javascript")
+        end
       end
 
       config.after_initialize do |app|
