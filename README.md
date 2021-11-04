@@ -12,6 +12,19 @@ The JavaScript for Hotwire::Livereload is installed via asset pipeline, which is
 2. Run `./bin/bundle install`
 3. Run `./bin/rails hotwire_livereload:install`
 
+## Configuration
+
+You can watch for changes in additional folders by adding them to `listen_paths`. For example, you can watch for CSS changes:
+
+```ruby
+# config/environments/development.rb
+
+Rails.application.configure do
+  # ...
+  config.hotwire_livereload.listen_paths << Rails.root.join("app/assets/stylesheets")
+end
+```
+
 ## Development
 
 To get started:
