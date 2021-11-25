@@ -38,9 +38,11 @@ module Hotwire
       config.after_initialize do |app|
         if Rails.env.development?
           @listener = Listen.to(*app.config.hotwire_livereload.listen_paths) do |modified, added, removed|
-            if modified.any? || removed.any? || added.any?
-              content = { modified: modified, removed: removed, added: added }
-              ActionCable.server.broadcast("hotwire-reload", content)
+            unless File.exists?(Rails.root.join("tmp/livereload-disable.txt")
+              if (modified.any? || removed.any? || added.any?)
+                content = { modified: modified, removed: removed, added: added }
+                ActionCable.server.broadcast("hotwire-reload", content)
+              end
             end
           end
           @listener.start
