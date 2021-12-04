@@ -36,7 +36,7 @@ module Hotwire
       end
 
       config.after_initialize do |app|
-        if Rails.env.development?
+        if Rails.env.development? && defined?(Rails::Server)
           @listener = Listen.to(*app.config.hotwire_livereload.listen_paths) do |modified, added, removed|
             unless File.exists?(DISABLE_FILE)
               if (modified.any? || removed.any? || added.any?)
