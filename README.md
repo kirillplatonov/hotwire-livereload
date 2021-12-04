@@ -10,7 +10,7 @@ The JavaScript for Hotwire::Livereload is installed via asset pipeline, which is
 
 1. Add `hotwire-livereload` gem to your Gemfile: `gem 'hotwire-livereload'`
 2. Run `./bin/bundle install`
-3. Run `./bin/rails hotwire_livereload:install`
+3. Run `./bin/rails livereload:install`
 
 ## Configuration
 
@@ -24,6 +24,20 @@ Rails.application.configure do
   config.hotwire_livereload.listen_paths << Rails.root.join("app/assets/stylesheets")
 end
 ```
+
+## Disable livereload
+
+To temporarily disable livereload use:
+```bash
+bin/rails livereload:disable
+```
+
+To re-enable:
+```bash
+bin/rails livereload:enable
+```
+
+No server restart is required. Disabling is managed by `tmp/livereload-disabled.txt` file.
 
 ## Development
 
