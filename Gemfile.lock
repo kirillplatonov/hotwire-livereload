@@ -143,10 +143,11 @@ GEM
 
 PLATFORMS
   arm64-darwin-20
+  arm64-darwin-21
 
 DEPENDENCIES
   byebug
   hotwire-livereload!
 
 BUNDLED WITH
-   2.2.25
+   2.2.32
