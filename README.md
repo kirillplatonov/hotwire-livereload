@@ -25,6 +25,11 @@ Rails.application.configure do
 end
 ```
 
+Folders listened by default:
+- `app/views`
+- `app/helpers`
+- `app/javascript`
+
 ## Disable livereload
 
 To temporarily disable livereload use:
