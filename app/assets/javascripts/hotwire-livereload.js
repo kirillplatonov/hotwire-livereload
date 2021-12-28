@@ -602,7 +602,8 @@
   var import_debounce = __toModule(require_debounce());
   var consumer = (0, import_actioncable.createConsumer)();
   var received = (0, import_debounce.default)(({ force_reload }) => {
-    if (force_reload) {
+    const onErrorPage = document.title === "Action Controller: Exception caught";
+    if (onErrorPage || force_reload) {
       console.log("[Hotwire::Livereload] Files changed. Force reloading..");
       document.location.reload();
     } else {
