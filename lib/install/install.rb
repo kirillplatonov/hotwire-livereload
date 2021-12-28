@@ -15,8 +15,14 @@ else
 end
 
 if CABLE_CONFIG_PATH.exist?
-  say "Enable redis in bundle"
-  uncomment_lines "Gemfile", %(gem "redis")
+  gemfile = File.read(Rails.root.join("Gemfile"))
+  if gemfile.include?("redis")
+    say "Uncomment redis in Gemfile"
+    uncomment_lines "Gemfile", %(gem "redis")
+  else
+    say "Add redis to Gemfile"
+    gem "redis"
+  end
 
   say "Switch development cable to use redis"
   gsub_file CABLE_CONFIG_PATH.to_s, /development:\n\s+adapter: async/, "development:\n  adapter: redis\n  url: redis://localhost:6379/1"
