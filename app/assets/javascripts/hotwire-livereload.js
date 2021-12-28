@@ -601,9 +601,14 @@
   var import_actioncable = __toModule(require_action_cable());
   var import_debounce = __toModule(require_debounce());
   var consumer = (0, import_actioncable.createConsumer)();
-  var received = (0, import_debounce.default)(() => {
-    console.log("[Hotwire::Livereload] Files changed");
-    Turbo.visit(window.location.href);
+  var received = (0, import_debounce.default)(({ force_reload }) => {
+    if (force_reload) {
+      console.log("[Hotwire::Livereload] Files changed. Force reloading..");
+      document.location.reload();
+    } else {
+      console.log("[Hotwire::Livereload] Files changed. Reloading..");
+      Turbo.visit(window.location.href);
+    }
   }, 300);
   consumer.subscriptions.create("Hotwire::Livereload::ReloadChannel", {
     received,
