@@ -46,14 +46,16 @@ module Hotwire
         if Rails.env.development? && defined?(Rails::Server)
           options = app.config.hotwire_livereload
           listen_paths = options.listen_paths.map(&:to_s).uniq
-          force_reload_paths = %r{#{options.force_reload_paths.map(&:to_s).uniq.join("|")}}
+          force_reload_paths = options.force_reload_paths.map(&:to_s).uniq.join("|")
 
           @listener = Listen.to(*listen_paths) do |modified, added, removed|
             unless File.exists?(DISABLE_FILE)
               changed = [modified, removed, added].flatten.uniq
               return unless changed.any?
 
-              force_reload = changed.any? { |path| path.match(force_reload_paths) }
+              force_reload = force_reload_paths.present? && changed.any? do |path|
+                path.match(%r{#{force_reload_paths}})
+              end
 
               ActionCable.server.broadcast("hotwire-reload", {
                 changed: changed,
