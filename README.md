@@ -21,13 +21,12 @@ rails livereload:install
 ## Configuration
 
 You can watch for changes in additional folders by adding them to `listen_paths`. For example, you can watch for CSS changes:
-
 ```ruby
 # config/environments/development.rb
 
 Rails.application.configure do
   # ...
-  config.hotwire_livereload.listen_paths << Rails.root.join("app/assets/stylesheets")
+  config.hotwire_livereload.listen_paths << Rails.root.join("app/custom_folder")
 end
 ```
 
@@ -40,6 +39,16 @@ Folders listened by default:
 - `app/assets/images`
 - `app/components`
 - `config/locales`
+
+You can setup force reloading (full page reload) for changes in some folders using `force_reload_paths` option. For example, you can trigger force reload on JS changes:
+```ruby
+# config/environments/development.rb
+
+Rails.application.configure do
+  # ...
+  config.hotwire_livereload.force_reload_paths << Rails.root.join("app/javascript")
+end
+```
 
 ## Disable livereload
 

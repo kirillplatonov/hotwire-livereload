@@ -8,6 +8,7 @@ module Hotwire
       isolate_namespace Hotwire::Livereload
       config.hotwire_livereload = ActiveSupport::OrderedOptions.new
       config.hotwire_livereload.listen_paths ||= []
+      config.hotwire_livereload.force_reload_paths ||= []
       config.autoload_once_paths = %W(
         #{root}/app/channels
         #{root}/app/helpers
@@ -26,10 +27,7 @@ module Hotwire
       end
 
       initializer "hotwire_livereload.set_configs" do |app|
-        options = app.config.hotwire_livereload
-        options.listen_paths = options.listen_paths.map(&:to_s)
-
-        default_paths = %w[
+        default_listen_paths = %w[
           app/views
           app/helpers
           app/javascript
@@ -38,19 +36,29 @@ module Hotwire
           app/assets/images
           app/components
           config/locales
-        ].map { |p| Rails.root.join(p).to_s }
-        options.listen_paths += default_paths.select { |p| Dir.exist?(p) }
+        ].map { |p| Rails.root.join(p) }
+
+        options = app.config.hotwire_livereload
+        options.listen_paths += default_listen_paths.select { |p| Dir.exist?(p) }
       end
 
       config.after_initialize do |app|
         if Rails.env.development? && defined?(Rails::Server)
-          listen_paths = app.config.hotwire_livereload.listen_paths.uniq
+          options = app.config.hotwire_livereload
+          listen_paths = options.listen_paths.map(&:to_s).uniq
+          force_reload_paths = %r{#{options.force_reload_paths.map(&:to_s).uniq.join("|")}}
+
           @listener = Listen.to(*listen_paths) do |modified, added, removed|
             unless File.exists?(DISABLE_FILE)
-              if (modified.any? || removed.any? || added.any?)
-                content = { modified: modified, removed: removed, added: added }
-                ActionCable.server.broadcast("hotwire-reload", content)
-              end
+              changed = [modified, removed, added].flatten.uniq
+              return unless changed.any?
+
+              force_reload = changed.any? { |path| path.match(force_reload_paths) }
+
+              ActionCable.server.broadcast("hotwire-reload", {
+                changed: changed,
+                force_reload: force_reload
+              })
             end
           end
           @listener.start

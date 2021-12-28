@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.authors     = ["Kirill Platonov"]
   spec.email       = ["mail@kirillplatonov.com"]
   spec.homepage    = "https://github.com/kirillplatonov/hotwire-livereload"
-  spec.summary     = "Automatically reload Hotwire Turbo when 'view' files are modified."
+  spec.summary     = "Automatically reload Hotwire Turbo when app files are modified."
   spec.license     = "MIT"
 
   spec.files = Dir["{app,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
