@@ -35,6 +35,11 @@ Folders listened by default:
 - `app/views`
 - `app/helpers`
 - `app/javascript`
+- `app/assets/stylesheets`
+- `app/assets/javascripts`
+- `app/assets/images`
+- `app/components`
+- `config/locales`
 
 ## Disable livereload
 
