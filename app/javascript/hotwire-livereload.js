@@ -3,7 +3,9 @@ import debounce from "debounce"
 
 const consumer = createConsumer()
 const received = debounce(({force_reload}) => {
-  if (force_reload) {
+  const onErrorPage = document.title === "Action Controller: Exception caught"
+
+  if (onErrorPage || force_reload) {
     console.log("[Hotwire::Livereload] Files changed. Force reloading..")
     document.location.reload()
   } else {
