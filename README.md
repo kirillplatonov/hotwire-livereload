@@ -8,9 +8,15 @@ https://user-images.githubusercontent.com/839922/131983979-afd0bcc7-86e8-4c53-97
 
 The JavaScript for Hotwire::Livereload is installed via asset pipeline, which is included with this gem.
 
-1. Add `hotwire-livereload` gem to your Gemfile: `gem 'hotwire-livereload'`
-2. Run `./bin/bundle install`
-3. Run `./bin/rails livereload:install`
+Add `hotwire-livereload` to your Gemfile:
+```
+bundle add hotwire-livereload --group development
+```
+
+Run installer:
+```
+rails livereload:install
+```
 
 ## Configuration
 
