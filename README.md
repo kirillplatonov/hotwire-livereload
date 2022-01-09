@@ -1,12 +1,10 @@
 # Hotwire::Livereload
 
-Automatically reload Hotwire Turbo when "view" files are modified.
+Automatically reload Hotwire Turbo when app files are modified.
 
-https://user-images.githubusercontent.com/839922/131983979-afd0bcc7-86e8-4c53-9758-3bf762dbb16a.mp4
+https://user-images.githubusercontent.com/839922/148676469-0acfa036-832e-4b40-aa05-1fdd945baa1f.mp4
 
-## Installation
-
-The JavaScript for Hotwire::Livereload is installed via asset pipeline, which is included with this gem.
+## Gettings
 
 Add `hotwire-livereload` to your Gemfile:
 ```
@@ -16,18 +14,6 @@ bundle add hotwire-livereload --group development
 Run installer:
 ```
 rails livereload:install
-```
-
-## Configuration
-
-You can watch for changes in additional folders by adding them to `listen_paths`. For example, you can watch for CSS changes:
-```ruby
-# config/environments/development.rb
-
-Rails.application.configure do
-  # ...
-  config.hotwire_livereload.listen_paths << Rails.root.join("app/custom_folder")
-end
 ```
 
 Folders listened by default:
@@ -40,12 +26,25 @@ Folders listened by default:
 - `app/components`
 - `config/locales`
 
-You can setup force reloading (full page reload) for changes in some folders using `force_reload_paths` option. For example, you can trigger force reload on JS changes:
+## Configuration
+
+You can watch for changes in additional folders by adding them to `listen_paths`:
 ```ruby
 # config/environments/development.rb
 
 Rails.application.configure do
   # ...
+  config.hotwire_livereload.listen_paths << Rails.root.join("app/custom_folder")
+end
+```
+
+If you don't have `data-turbo-track="reload"` attribute on your JS and CSS bundles you might need to setup force reloading. This will trigger full browser reloading for JS and CSS files only:
+```ruby
+# config/environments/development.rb
+
+Rails.application.configure do
+  # ...
+  config.hotwire_livereload.force_reload_paths << Rails.root.join("app/assets/stylesheets")
   config.hotwire_livereload.force_reload_paths << Rails.root.join("app/javascript")
 end
 ```
