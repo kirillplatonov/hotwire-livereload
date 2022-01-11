@@ -9,6 +9,7 @@ module Hotwire
       config.hotwire_livereload = ActiveSupport::OrderedOptions.new
       config.hotwire_livereload.listen_paths ||= []
       config.hotwire_livereload.force_reload_paths ||= []
+      config.hotwire_livereload.disable_default_listeners = false
       config.autoload_once_paths = %W(
         #{root}/app/channels
         #{root}/app/helpers
@@ -27,19 +28,21 @@ module Hotwire
       end
 
       initializer "hotwire_livereload.set_configs" do |app|
-        default_listen_paths = %w[
-          app/views
-          app/helpers
-          app/javascript
-          app/assets/stylesheets
-          app/assets/javascripts
-          app/assets/images
-          app/components
-          config/locales
-        ].map { |p| Rails.root.join(p) }
+        unless app.config.hotwire_livereload.disable_default_listeners
+          default_listen_paths = %w[
+            app/views
+            app/helpers
+            app/javascript
+            app/assets/stylesheets
+            app/assets/javascripts
+            app/assets/images
+            app/components
+            config/locales
+          ].map { |p| Rails.root.join(p) }
 
-        options = app.config.hotwire_livereload
-        options.listen_paths += default_listen_paths.select { |p| Dir.exist?(p) }
+          options = app.config.hotwire_livereload
+          options.listen_paths += default_listen_paths.select { |p| Dir.exist?(p) }
+        end
       end
 
       config.after_initialize do |app|
