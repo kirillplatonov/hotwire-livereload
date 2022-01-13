@@ -38,6 +38,20 @@ Rails.application.configure do
 end
 ```
 
+You can disable default listen paths and fully override them:
+```ruby
+# config/environments/development.rb
+
+Rails.application.configure do
+  # ...
+  config.hotwire_livereload.disable_default_listeners = true
+  config.hotwire_livereload.listen_paths = [
+    Rails.root.join("app/assets/stylesheets"),
+    Rails.root.join("app/javascript")
+  ]
+end
+```
+
 If you don't have `data-turbo-track="reload"` attribute on your JS and CSS bundles you might need to setup force reloading. This will trigger full browser reloading for JS and CSS files only:
 ```ruby
 # config/environments/development.rb

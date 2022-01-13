@@ -28,7 +28,9 @@ module Hotwire
       end
 
       initializer "hotwire_livereload.set_configs" do |app|
-        unless app.config.hotwire_livereload.disable_default_listeners
+        options = app.config.hotwire_livereload
+
+        unless options.disable_default_listeners
           default_listen_paths = %w[
             app/views
             app/helpers
@@ -39,8 +41,6 @@ module Hotwire
             app/components
             config/locales
           ].map { |p| Rails.root.join(p) }
-
-          options = app.config.hotwire_livereload
           options.listen_paths += default_listen_paths.select { |p| Dir.exist?(p) }
         end
       end
