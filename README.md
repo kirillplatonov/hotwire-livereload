@@ -52,7 +52,7 @@ Rails.application.configure do
 end
 ```
 
-If you don't have `data-turbo-track="reload"` attribute on your JS and CSS bundles you might need to setup force reloading. This will trigger full browser reloading for JS and CSS files only:
+If you don't have `data-turbolinks-track="reload"` attribute on your JS and CSS bundles you might need to setup force reloading. This will trigger full browser reloading for JS and CSS files only:
 ```ruby
 # config/environments/development.rb
 
