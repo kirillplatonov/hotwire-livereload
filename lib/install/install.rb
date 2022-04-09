@@ -4,9 +4,7 @@ CABLE_CONFIG_PATH = Rails.root.join("config/cable.yml")
 if APP_LAYOUT_PATH.exist?
   say "Add Hotwire Livereload tag in application layout"
   content = <<-HTML
-\n    <% if Rails.env.development? %>
-      <%= javascript_include_tag "hotwire-livereload", defer: true %>
-    <% end %>
+\n    <%= javascript_include_tag 'hotwire-livereload', defer: true if Rails.env.development? %>
 HTML
   insert_into_file APP_LAYOUT_PATH, content.chop, before: /\s*<\/head>/
 else
