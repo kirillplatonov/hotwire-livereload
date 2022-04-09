@@ -15,10 +15,8 @@ module Hotwire
         #{root}/app/helpers
       )
 
-      initializer "hotwire_livereload.assets" do
-        if Rails.application.config.respond_to?(:assets)
-          Rails.application.config.assets.precompile += %w( hotwire-livereload.js )
-        end
+      initializer 'hotwire_livereload.assets.precompile' do |app|
+        app.config.assets.precompile += %w( hotwire-livereload.js )
       end
 
       initializer "hotwire_livereload.helpers" do
