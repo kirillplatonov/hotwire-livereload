@@ -2,7 +2,7 @@
   "name": "hotwire-livereload",
   "private": "true",
   "scripts": {
-    "build": "esbuild app/javascript/hotwire-livereload.js  --outfile=app/assets/javascripts/hotwire-livereload.js --bundle",
+    "build": "esbuild app/javascript/*.js --outdir=app/assets/javascripts/ --bundle",
     "watch": "npm run build -- --watch"
   },
   "dependencies": {

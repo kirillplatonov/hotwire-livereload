@@ -1,0 +1,4 @@
+<% if Rails.env.development? %>
+  <%= turbo_stream_from('hotwire-livereload') %>
+  <%= javascript_include_tag('hotwire-livereload-turbo-stream', defer: true) %>
+<% end %>

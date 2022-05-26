@@ -112,7 +112,7 @@ GEM
       net-protocol
       timeout
     nio4r (2.5.8)
-    nokogiri (1.13.0-arm64-darwin)
+    nokogiri (1.13.0-x86_64-darwin)
       racc (~> 1.4)
     racc (1.6.0)
     rack (2.2.3)
@@ -161,6 +161,7 @@ GEM
 PLATFORMS
   arm64-darwin-20
   arm64-darwin-21
+  x86_64-darwin-20
 
 DEPENDENCIES
   hotwire-livereload!

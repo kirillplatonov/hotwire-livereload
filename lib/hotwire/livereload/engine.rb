@@ -9,6 +9,7 @@ module Hotwire
       config.hotwire_livereload = ActiveSupport::OrderedOptions.new
       config.hotwire_livereload.listen_paths ||= []
       config.hotwire_livereload.force_reload_paths ||= []
+      config.hotwire_livereload.reload_method = :action_cable
       config.hotwire_livereload.disable_default_listeners = false
       config.autoload_once_paths = %W(
         #{root}/app/channels
@@ -17,7 +18,7 @@ module Hotwire
 
       initializer "hotwire_livereload.assets" do
         if Rails.application.config.respond_to?(:assets)
-          Rails.application.config.assets.precompile += %w( hotwire-livereload.js )
+          Rails.application.config.assets.precompile += %w( hotwire-livereload.js hotwire-livereload-turbo-stream.js)
         end
       end
 
@@ -60,10 +61,12 @@ module Hotwire
                 path.match(%r{#{force_reload_paths}})
               end
 
-              ActionCable.server.broadcast("hotwire-reload", {
-                changed: changed,
-                force_reload: force_reload
-              })
+              options = {changed: changed, force_reload: force_reload}
+              if config.hotwire_livereload.reload_method == :turbo_stream
+                Hotwire::Livereload.turbo_stream(options)
+              else
+                Hotwire::Livereload.action_cable(options)
+              end
             end
           end
           @listener.start
@@ -75,6 +78,17 @@ module Hotwire
           @listener&.stop
         end
       end
+    end
+
+    def self.turbo_stream(locals)
+      Turbo::StreamsChannel.broadcast_replace_to('hotwire-livereload',
+                                                 target: 'hotwire-livereload',
+                                                 partial: 'hotwire/livereload/turbo_stream',
+                                                 locals: locals)
+    end
+
+    def self.action_cable(opts)
+      ActionCable.server.broadcast("hotwire-reload", opts)
     end
   end
 end
