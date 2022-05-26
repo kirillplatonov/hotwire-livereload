@@ -1,4 +1,4 @@
-`PATH
+PATH
   remote: .
   specs:
     hotwire-livereload (1.1.0)
