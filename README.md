@@ -33,7 +33,7 @@ Add the helper within the `<head>` tag in your custom layout.  Note: it only ren
 ```diff
 <head>
   ...
-+ <%= hotwire_livereload_tags %>
++ <%= hotwire_livereload_tags if Rails.env.development? %>
   ...
 </head>
 ```
@@ -43,7 +43,7 @@ If using `config.hotwire_livereload.reload_method = :turbo_stream`, place *after
 <head>
   ...
   <%= action_cable_meta_tag %>
-+ <%= hotwire_livereload_tags %>
++ <%= hotwire_livereload_tags if Rails.env.development? %>
   ...
 </head>
 ```
