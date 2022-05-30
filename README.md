@@ -8,7 +8,7 @@ https://user-images.githubusercontent.com/839922/148676469-0acfa036-832e-4b40-aa
 
 Add `hotwire-livereload` to your Gemfile:
 ```
-bundle add hotwire-livereload --group development
+bundle add hotwire-livereload
 ```
 
 Run installer:
@@ -27,26 +27,6 @@ Folders listened by default:
 - `config/locales`
 
 ## Configuration
-
-Add the helper within the `<head>` tag in your custom layout.  Note: it only renders `if Rails.env.development?`
-
-```diff
-<head>
-  ...
-+ <%= hotwire_livereload_tags if Rails.env.development? %>
-  ...
-</head>
-```
-If using `config.hotwire_livereload.reload_method = :turbo_stream`, place *after* the `<%= action_cable_meta_tag %>`.
-
-```diff
-<head>
-  ...
-  <%= action_cable_meta_tag %>
-+ <%= hotwire_livereload_tags if Rails.env.development? %>
-  ...
-</head>
-```
 
 You can watch for changes in additional folders by adding them to `listen_paths`:
 ```ruby
@@ -91,6 +71,17 @@ Rails.application.configure do
   # ...
   config.hotwire_livereload.reload_method = :turbo_stream
 end
+```
+
+In that case you need to place `hotwire_livereload_tags` helper in your layout *after* the `<%= action_cable_meta_tag %>`.
+
+```diff
+<head>
+  ...
+  <%= action_cable_meta_tag %>
++ <%= hotwire_livereload_tags if Rails.env.development? %>
+  ...
+</head>
 ```
 
 ## Disable livereload
