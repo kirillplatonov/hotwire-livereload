@@ -599,20 +599,24 @@
 
   // app/javascript/hotwire-livereload.js
   var import_actioncable = __toModule(require_action_cable());
+
+  // app/javascript/lib/hotwire-livereload-received.js
   var import_debounce = __toModule(require_debounce());
-  var consumer = (0, import_actioncable.createConsumer)();
-  var received = (0, import_debounce.default)(({ force_reload }) => {
+  var hotwire_livereload_received_default = (0, import_debounce.default)(({ force_reload }) => {
     const onErrorPage = document.title === "Action Controller: Exception caught";
     if (onErrorPage || force_reload) {
       console.log("[Hotwire::Livereload] Files changed. Force reloading..");
       document.location.reload();
     } else {
       console.log("[Hotwire::Livereload] Files changed. Reloading..");
-      Turbo.visit(window.location.href);
+      Turbo.visit(window.location.href, { action: "replace" });
     }
   }, 300);
+
+  // app/javascript/hotwire-livereload.js
+  var consumer = (0, import_actioncable.createConsumer)();
   consumer.subscriptions.create("Hotwire::Livereload::ReloadChannel", {
-    received,
+    received: hotwire_livereload_received_default,
     connected() {
       console.log("[Hotwire::Livereload] Websocket connected");
     },

@@ -28,6 +28,26 @@ Folders listened by default:
 
 ## Configuration
 
+Add the helper within the `<head>` tag in your custom layout.  Note: it only renders `if Rails.env.development?`
+
+```diff
+<head>
+  ...
++ <%= hotwire_livereload_tags if Rails.env.development? %>
+  ...
+</head>
+```
+If using `config.hotwire_livereload.reload_method = :turbo_stream`, place *after* the `<%= action_cable_meta_tag %>`.
+
+```diff
+<head>
+  ...
+  <%= action_cable_meta_tag %>
++ <%= hotwire_livereload_tags if Rails.env.development? %>
+  ...
+</head>
+```
+
 You can watch for changes in additional folders by adding them to `listen_paths`:
 ```ruby
 # config/environments/development.rb
@@ -60,6 +80,16 @@ Rails.application.configure do
   # ...
   config.hotwire_livereload.force_reload_paths << Rails.root.join("app/assets/stylesheets")
   config.hotwire_livereload.force_reload_paths << Rails.root.join("app/javascript")
+end
+```
+
+Instead of a direct ActionCable websocket connection, you can reuse the existing TurboStream websocket connection and send updates using standard turbo-streams:
+```ruby
+# config/environments/development.rb
+
+Rails.application.configure do
+  # ...
+  config.hotwire_livereload.reload_method = :turbo_stream
 end
 ```
 

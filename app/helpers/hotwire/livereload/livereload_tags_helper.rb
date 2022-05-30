@@ -1,7 +1,11 @@
 module Hotwire::Livereload::LivereloadTagsHelper
   def hotwire_livereload_tags
-    return unless Rails.env.development?
+    partial = if Hotwire::Livereload::Engine.config.hotwire_livereload.reload_method == :turbo_stream
+      'hotwire/livereload/head_turbo_stream'
+    else
+      'hotwire/livereload/head_action_cable'
+    end
 
-    javascript_include_tag "hotwire-livereload", defer: true
+    render partial
   end
 end
