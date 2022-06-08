@@ -93,12 +93,11 @@
     if (window.HotwireLivereload) {
       return;
     }
-    window.HotwireLivereload = function(event) {
-      const element = event.target.querySelector("template").content.getElementById("hotwire-livereload");
-      if (!element) {
-        return;
+    window.HotwireLivereload = function({ target }) {
+      const element = target.querySelector("template")?.content.getElementById("hotwire-livereload");
+      if (element) {
+        hotwire_livereload_received_default({ force_reload: element.dataset.forceReload });
       }
-      hotwire_livereload_received_default({ force_reload: element.dataset.forceReload });
     };
     document.addEventListener("turbo:before-stream-render", window.HotwireLivereload);
   })();
