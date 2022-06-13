@@ -17,7 +17,7 @@ if CABLE_CONFIG_PATH.exist?
   gemfile = File.read(Rails.root.join("Gemfile"))
   if gemfile.include?("redis")
     say "Uncomment redis in Gemfile"
-    uncomment_lines "Gemfile", %(gem "redis")
+    uncomment_lines "Gemfile", %r{gem ['"]redis['"]}
   else
     say "Add redis to Gemfile"
     gem "redis"
