@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    hotwire-livereload (1.2.1)
+    hotwire-livereload (1.2.2)
       listen (>= 3.0.0)
       rails (>= 6.0.0)
 
@@ -77,7 +77,7 @@ GEM
     concurrent-ruby (1.1.10)
     crass (1.0.6)
     digest (3.1.0)
-    erubi (1.10.0)
+    erubi (1.11.0)
     ffi (1.15.5)
     globalid (1.0.0)
       activesupport (>= 5.0)
@@ -94,7 +94,7 @@ GEM
     marcel (1.0.2)
     method_source (1.0.0)
     mini_mime (1.1.2)
-    minitest (5.16.2)
+    minitest (5.16.3)
     net-imap (0.2.3)
       digest
       net-protocol
