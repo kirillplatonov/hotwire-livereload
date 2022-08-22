@@ -47,7 +47,7 @@ module Hotwire
       end
 
       config.after_initialize do |app|
-        if Rails.env.development? && defined?(Rails::Server)
+        if Rails.env.development? && Hotwire::Livereload.server_process?
           options = app.config.hotwire_livereload
           listen_paths = options.listen_paths.map(&:to_s).uniq
           force_reload_paths = options.force_reload_paths.map(&:to_s).uniq.join("|")
@@ -81,14 +81,23 @@ module Hotwire
     end
 
     def self.turbo_stream(locals)
-      Turbo::StreamsChannel.broadcast_replace_to('hotwire-livereload',
-                                                 target: 'hotwire-livereload',
-                                                 partial: 'hotwire/livereload/turbo_stream',
-                                                 locals: locals)
+      Turbo::StreamsChannel.broadcast_replace_to(
+        "hotwire-livereload",
+        target: "hotwire-livereload",
+        partial: "hotwire/livereload/turbo_stream",
+        locals: locals
+      )
     end
 
     def self.action_cable(opts)
       ActionCable.server.broadcast("hotwire-reload", opts)
+    end
+
+    def self.server_process?
+      puma_process = defined?(::Puma) && File.basename($0) == "puma"
+      rails_server = defined?(Rails::Server)
+
+      puma_process || rails_server
     end
   end
 end
