@@ -6,7 +6,7 @@ import received from "./lib/hotwire-livereload-received"
   window.HotwireLivereload = function({ target }) {
     const element = target.querySelector('template')?.content.getElementById('hotwire-livereload')
     if (element) {
-      received({ force_reload: element.dataset.forceReload })
+      received({ changed: JSON.parse(element.dataset.changed), mode: element.dataset.mode })
     }
   };
 

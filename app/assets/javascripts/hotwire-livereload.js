@@ -607,7 +607,7 @@
   // node_modules/debounce/index.js
   var require_debounce = __commonJS({
     "node_modules/debounce/index.js"(exports, module) {
-      function debounce3(func, wait, immediate) {
+      function debounce2(func, wait, immediate) {
         var timeout, args, context, timestamp, result;
         if (null == wait)
           wait = 100;
@@ -653,8 +653,8 @@
         };
         return debounced;
       }
-      debounce3.debounce = debounce3;
-      module.exports = debounce3;
+      debounce2.debounce = debounce2;
+      module.exports = debounce2;
     }
   });
 
@@ -662,17 +662,31 @@
   var import_actioncable = __toESM(require_action_cable());
 
   // app/javascript/lib/hotwire-livereload-received.js
-  var import_debounce = __toESM(require_debounce());
-  var hotwire_livereload_received_default = (0, import_debounce.default)(({ force_reload }) => {
+  var hotwire_livereload_received_default = ({ mode, changed }) => {
     const onErrorPage = document.title === "Action Controller: Exception caught";
-    if (onErrorPage || force_reload) {
+    if (onErrorPage || mode === "force") {
       console.log("[Hotwire::Livereload] Files changed. Force reloading..");
       document.location.reload();
     } else {
-      console.log("[Hotwire::Livereload] Files changed. Reloading..");
-      Turbo.visit(window.location.href, { action: "replace" });
+      if (mode === "css") {
+        changed.forEach((item, index) => {
+          const stylesheet = document.querySelector(`[data-stylesheet="${item.file}"]`);
+          if (stylesheet) {
+            console.log(`[Hotwire::Livereload] Stylesheet ${item.file} changed. Reloading..`);
+            stylesheet.href = item.path;
+          }
+        });
+      } else {
+        if (window.Turbo) {
+          console.log("[Hotwire::Livereload] Files changed. Reloading..");
+          Turbo.visit(window.location.href, { action: "replace" });
+        } else {
+          console.log("[Hotwire::Livereload] Files changed. Force reloading..");
+          document.location.reload();
+        }
+      }
     }
-  }, 300);
+  };
 
   // app/javascript/lib/hotwire-livereload-scroll-position.js
   var KEY = "hotwire-livereload-scrollPosition";
@@ -697,7 +711,7 @@
   var hotwire_livereload_scroll_position_default = { read, save, restore, reset };
 
   // app/javascript/hotwire-livereload.js
-  var import_debounce2 = __toESM(require_debounce());
+  var import_debounce = __toESM(require_debounce());
   var consumer = (0, import_actioncable.createConsumer)();
   consumer.subscriptions.create("Hotwire::Livereload::ReloadChannel", {
     received: hotwire_livereload_received_default,
@@ -708,7 +722,7 @@
       console.log("[Hotwire::Livereload] Websocket disconnected");
     }
   });
-  var debouncedScroll = (0, import_debounce2.default)(() => {
+  var debouncedScroll = (0, import_debounce.default)(() => {
     if (window.scrollY !== 0)
       return hotwire_livereload_scroll_position_default.save();
     setTimeout(() => {
