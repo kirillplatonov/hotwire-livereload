@@ -1,13 +1,27 @@
 import debounce from "debounce"
 
-export default debounce(({force_reload}) => {
+const debounced_soft_reload = debounce(() => {
+  console.log("[Hotwire::Livereload] Files changed. Reloading..")
+  Turbo.visit(window.location.href, {action: 'replace'})
+}, 300, true)
+
+export default ({mode, changed}) => {
   const onErrorPage = document.title === "Action Controller: Exception caught"
 
-  if (onErrorPage || force_reload) {
+  if (onErrorPage || mode === "force") {
     console.log("[Hotwire::Livereload] Files changed. Force reloading..")
     document.location.reload()
   } else {
-    console.log("[Hotwire::Livereload] Files changed. Reloading..")
-    Turbo.visit(window.location.href, { action: 'replace' })
+    if (mode === "css"){
+      changed.forEach((item, index) => {
+        const stylesheet = document.querySelector(`[data-stylesheet="${item.file}"]`);
+        if(stylesheet) {
+          console.log(`[Hotwire::Livereload] Stylesheet ${item.file} changed. Reloading..`)
+          stylesheet.href = item.path;
+        }
+      })
+    } else {
+      debounced_soft_reload()
+    }
   }
-}, 300)
+}

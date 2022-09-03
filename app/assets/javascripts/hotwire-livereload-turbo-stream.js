@@ -77,16 +77,29 @@
 
   // app/javascript/lib/hotwire-livereload-received.js
   var import_debounce = __toModule(require_debounce());
-  var hotwire_livereload_received_default = (0, import_debounce.default)(({ force_reload }) => {
+  var debounced_soft_reload = (0, import_debounce.default)(() => {
+    console.log("[Hotwire::Livereload] Files changed. Reloading..");
+    Turbo.visit(window.location.href, { action: "replace" });
+  }, 300, true);
+  var hotwire_livereload_received_default = ({ mode, changed }) => {
     const onErrorPage = document.title === "Action Controller: Exception caught";
-    if (onErrorPage || force_reload) {
+    if (onErrorPage || mode === "force") {
       console.log("[Hotwire::Livereload] Files changed. Force reloading..");
       document.location.reload();
     } else {
-      console.log("[Hotwire::Livereload] Files changed. Reloading..");
-      Turbo.visit(window.location.href, { action: "replace" });
+      if (mode === "css") {
+        changed.forEach((item, index) => {
+          const stylesheet = document.querySelector(`[data-stylesheet="${item.file}"]`);
+          if (stylesheet) {
+            console.log(`[Hotwire::Livereload] Stylesheet ${item.file} changed. Reloading..`);
+            stylesheet.href = item.path;
+          }
+        });
+      } else {
+        debounced_soft_reload();
+      }
     }
-  }, 300);
+  };
 
   // app/javascript/hotwire-livereload-turbo-stream.js
   (() => {

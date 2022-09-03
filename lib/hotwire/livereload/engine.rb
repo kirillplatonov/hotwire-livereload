@@ -9,6 +9,7 @@ module Hotwire
       config.hotwire_livereload = ActiveSupport::OrderedOptions.new
       config.hotwire_livereload.listen_paths ||= []
       config.hotwire_livereload.force_reload_paths ||= []
+      config.hotwire_livereload.css_listen_paths ||= []
       config.hotwire_livereload.reload_method = :action_cable
       config.hotwire_livereload.disable_default_listeners = false
       config.autoload_once_paths = %W(
@@ -32,17 +33,22 @@ module Hotwire
         options = app.config.hotwire_livereload
 
         unless options.disable_default_listeners
+          options.css_listen_paths += %w[
+            app/assets/builds
+          ].map { |p| Rails.root.join(p) }
+           .select { |p| Dir.exist?(p) }
+
           default_listen_paths = %w[
             app/views
             app/helpers
             app/javascript
-            app/assets/stylesheets
             app/assets/javascripts
             app/assets/images
             app/components
             config/locales
           ].map { |p| Rails.root.join(p) }
-          options.listen_paths += default_listen_paths.select { |p| Dir.exist?(p) }
+           .select { |p| Dir.exist?(p) }
+          options.listen_paths += default_listen_paths + options.css_listen_paths
         end
       end
 
@@ -51,17 +57,38 @@ module Hotwire
           options = app.config.hotwire_livereload
           listen_paths = options.listen_paths.map(&:to_s).uniq
           force_reload_paths = options.force_reload_paths.map(&:to_s).uniq.join("|")
+          css_reload_paths = options.css_listen_paths.map(&:to_s).uniq.join("|")
 
           @listener = Listen.to(*listen_paths) do |modified, added, removed|
             unless File.exist?(DISABLE_FILE)
               changed = [modified, removed, added].flatten.uniq
               return unless changed.any?
 
-              force_reload = force_reload_paths.present? && changed.any? do |path|
+              mode  = :soft
+
+              mode  = :css if css_reload_paths.present? && changed.all? do |path|
+                path.match(%r{#{css_reload_paths}})
+              end
+
+              mode  = :force if force_reload_paths.present? && changed.any? do |path|
                 path.match(%r{#{force_reload_paths}})
               end
 
-              options = {changed: changed, force_reload: force_reload}
+              changed.map! do |path|
+                if path.match(%r{#{css_reload_paths}})
+                  filename = path.split("/").last
+                  {
+                    file: filename,
+                    path: Rails.application.config.assets.prefix + "/" + Rails.application.assets[filename].digest_path
+                  }
+                else
+                  {
+                    file: path.delete_prefix(Rails.root.to_s)
+                  }
+                end
+              end
+
+              options = {changed: changed, mode: mode}
               if config.hotwire_livereload.reload_method == :turbo_stream
                 Hotwire::Livereload.turbo_stream(options)
               else
