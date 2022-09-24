@@ -1,0 +1,1 @@
+import "@hotwired/turbo-rails";

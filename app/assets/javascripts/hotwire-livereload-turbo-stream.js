@@ -96,7 +96,12 @@
           }
         });
       } else {
-        debounced_soft_reload();
+        if (window.Turbo) {
+          debounced_soft_reload();
+        } else {
+          console.log("[Hotwire::Livereload] Files changed. Force reloading..");
+          document.location.reload();
+        }
       }
     }
   };
@@ -109,7 +114,7 @@
     window.HotwireLivereload = function({ target }) {
       const element = target.querySelector("template")?.content.getElementById("hotwire-livereload");
       if (element) {
-        hotwire_livereload_received_default({ force_reload: element.dataset.forceReload });
+        hotwire_livereload_received_default({ changed: JSON.parse(element.dataset.changed), mode: element.dataset.mode });
       }
     };
     document.addEventListener("turbo:before-stream-render", window.HotwireLivereload);

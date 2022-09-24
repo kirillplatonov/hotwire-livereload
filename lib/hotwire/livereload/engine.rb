@@ -4,6 +4,11 @@ require "listen"
 
 module Hotwire
   module Livereload
+    class << self
+      attr_accessor :error_page_injected_code
+    end
+
+
     class Engine < ::Rails::Engine
       isolate_namespace Hotwire::Livereload
       config.hotwire_livereload = ActiveSupport::OrderedOptions.new
@@ -17,15 +22,30 @@ module Hotwire
         #{root}/app/helpers
       )
 
+      config.hotwire_livereload.error_page_injected_code = lambda do
+        ActionController::Base.helpers.javascript_include_tag('hotwire-livereload', defer: true)
+      end
+
       initializer "hotwire_livereload.assets" do
         if Rails.application.config.respond_to?(:assets)
-          Rails.application.config.assets.precompile += %w( hotwire-livereload.js hotwire-livereload-turbo-stream.js)
+          Rails.application.config.assets.precompile += %w( hotwire-livereload.js hotwire-livereload-turbo.js hotwire-livereload-turbo-stream.js)
         end
       end
 
       initializer "hotwire_livereload.helpers" do
         ActiveSupport.on_load(:action_controller_base) do
           helper Hotwire::Livereload::LivereloadTagsHelper
+          Hotwire::Livereload.error_page_injected_code = lambda do
+            if Rails.env.development?
+              if Rails.application.config.hotwire_livereload.reload_method == :turbo_stream
+                ActionController::Base.helpers.javascript_include_tag('hotwire-livereload-turbo', defer: true) +
+                ActionController::Base.helpers.javascript_include_tag('hotwire-livereload-turbo-stream', defer: true) +
+                ActionController::Base.helpers.turbo_stream_from('hotwire-livereload')
+              else
+                ActionController::Base.helpers.javascript_include_tag('hotwire-livereload', defer: true)
+              end
+            end
+          end
         end
       end
 

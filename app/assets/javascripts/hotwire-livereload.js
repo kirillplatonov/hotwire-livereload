@@ -318,6 +318,7 @@
               case message_types.ping:
                 return this.monitor.recordPing();
               case message_types.confirmation:
+                this.subscriptions.confirmSubscription(identifier);
                 return this.subscriptions.notify(identifier, "connected");
               case message_types.rejection:
                 return this.subscriptions.reject(identifier);
@@ -385,10 +386,52 @@
           };
           return Subscription2;
         }();
+        var SubscriptionGuarantor = function() {
+          function SubscriptionGuarantor2(subscriptions) {
+            classCallCheck(this, SubscriptionGuarantor2);
+            this.subscriptions = subscriptions;
+            this.pendingSubscriptions = [];
+          }
+          SubscriptionGuarantor2.prototype.guarantee = function guarantee(subscription) {
+            if (this.pendingSubscriptions.indexOf(subscription) == -1) {
+              logger.log("SubscriptionGuarantor guaranteeing " + subscription.identifier);
+              this.pendingSubscriptions.push(subscription);
+            } else {
+              logger.log("SubscriptionGuarantor already guaranteeing " + subscription.identifier);
+            }
+            this.startGuaranteeing();
+          };
+          SubscriptionGuarantor2.prototype.forget = function forget(subscription) {
+            logger.log("SubscriptionGuarantor forgetting " + subscription.identifier);
+            this.pendingSubscriptions = this.pendingSubscriptions.filter(function(s) {
+              return s !== subscription;
+            });
+          };
+          SubscriptionGuarantor2.prototype.startGuaranteeing = function startGuaranteeing() {
+            this.stopGuaranteeing();
+            this.retrySubscribing();
+          };
+          SubscriptionGuarantor2.prototype.stopGuaranteeing = function stopGuaranteeing() {
+            clearTimeout(this.retryTimeout);
+          };
+          SubscriptionGuarantor2.prototype.retrySubscribing = function retrySubscribing() {
+            var _this = this;
+            this.retryTimeout = setTimeout(function() {
+              if (_this.subscriptions && typeof _this.subscriptions.subscribe === "function") {
+                _this.pendingSubscriptions.map(function(subscription) {
+                  logger.log("SubscriptionGuarantor resubscribing " + subscription.identifier);
+                  _this.subscriptions.subscribe(subscription);
+                });
+              }
+            }, 500);
+          };
+          return SubscriptionGuarantor2;
+        }();
         var Subscriptions = function() {
           function Subscriptions2(consumer2) {
             classCallCheck(this, Subscriptions2);
             this.consumer = consumer2;
+            this.guarantor = new SubscriptionGuarantor(this);
             this.subscriptions = [];
           }
           Subscriptions2.prototype.create = function create(channelName, mixin) {
@@ -403,7 +446,7 @@
             this.subscriptions.push(subscription);
             this.consumer.ensureActiveConnection();
             this.notify(subscription, "initialized");
-            this.sendCommand(subscription, "subscribe");
+            this.subscribe(subscription);
             return subscription;
           };
           Subscriptions2.prototype.remove = function remove(subscription) {
@@ -422,6 +465,7 @@
             });
           };
           Subscriptions2.prototype.forget = function forget(subscription) {
+            this.guarantor.forget(subscription);
             this.subscriptions = this.subscriptions.filter(function(s) {
               return s !== subscription;
             });
@@ -435,7 +479,7 @@
           Subscriptions2.prototype.reload = function reload() {
             var _this2 = this;
             return this.subscriptions.map(function(subscription) {
-              return _this2.sendCommand(subscription, "subscribe");
+              return _this2.subscribe(subscription);
             });
           };
           Subscriptions2.prototype.notifyAll = function notifyAll(callbackName) {
@@ -459,6 +503,18 @@
             }
             return subscriptions.map(function(subscription2) {
               return typeof subscription2[callbackName] === "function" ? subscription2[callbackName].apply(subscription2, args) : void 0;
+            });
+          };
+          Subscriptions2.prototype.subscribe = function subscribe(subscription) {
+            if (this.sendCommand(subscription, "subscribe")) {
+              this.guarantor.guarantee(subscription);
+            }
+          };
+          Subscriptions2.prototype.confirmSubscription = function confirmSubscription(identifier) {
+            var _this4 = this;
+            logger.log("Subscription confirmed " + identifier);
+            this.findAll(identifier).map(function(subscription) {
+              return _this4.guarantor.forget(subscription);
             });
           };
           Subscriptions2.prototype.sendCommand = function sendCommand(subscription, command) {
@@ -531,6 +587,7 @@
         exports2.INTERNAL = INTERNAL;
         exports2.Subscription = Subscription;
         exports2.Subscriptions = Subscriptions;
+        exports2.SubscriptionGuarantor = SubscriptionGuarantor;
         exports2.adapters = adapters;
         exports2.createWebSocketURL = createWebSocketURL;
         exports2.logger = logger;
@@ -621,7 +678,12 @@
           }
         });
       } else {
-        debounced_soft_reload();
+        if (window.Turbo) {
+          debounced_soft_reload();
+        } else {
+          console.log("[Hotwire::Livereload] Files changed. Force reloading..");
+          document.location.reload();
+        }
       }
     }
   };

@@ -21,7 +21,12 @@ export default ({mode, changed}) => {
         }
       })
     } else {
-      debounced_soft_reload()
+      if (window.Turbo) {
+        debounced_soft_reload()
+      } else {
+        console.log("[Hotwire::Livereload] Files changed. Force reloading..")
+        document.location.reload()
+      }
     }
   }
 }
