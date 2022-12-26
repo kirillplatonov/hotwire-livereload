@@ -53,7 +53,7 @@ module Hotwire
           force_reload_paths = options.force_reload_paths.map(&:to_s).uniq.join("|")
 
           @listener = Listen.to(*listen_paths) do |modified, added, removed|
-            unless File.exists?(DISABLE_FILE)
+            unless File.exist?(DISABLE_FILE)
               changed = [modified, removed, added].flatten.uniq
               return unless changed.any?
 
