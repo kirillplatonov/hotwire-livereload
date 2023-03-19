@@ -41,8 +41,19 @@ module Hotwire
             app/assets/images
             app/components
             config/locales
-          ].map { |p| Rails.root.join(p) }
-          options.listen_paths += default_listen_paths.select { |p| Dir.exist?(p) }
+          ]
+          if defined?(Jsbundling)
+            default_listen_paths -= %w[app/javascript]
+            default_listen_paths += %w[app/assets/builds]
+          end
+          if defined?(Cssbundling)
+            default_listen_paths -= %w[app/assets/stylesheets]
+            default_listen_paths += %w[app/assets/builds]
+          end
+          options.listen_paths += default_listen_paths
+            .uniq
+            .map { |p| Rails.root.join(p) }
+            .select { |p| Dir.exist?(p) }
         end
       end
 

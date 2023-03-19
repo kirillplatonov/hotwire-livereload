@@ -30,6 +30,8 @@ Folders listened by default:
 - `app/components`
 - `config/locales`
 
+The gem detects if you use [`jsbundling-rails`](https://github.com/rails/jsbundling-rails) or [`cssbundling-rails`](https://github.com/rails/cssbundling-rails) and watches for changes in their output folder `app/assets/builds` automatically.
+
 ## Configuration
 
 You can watch for changes in additional folders by adding them to `listen_paths`:
