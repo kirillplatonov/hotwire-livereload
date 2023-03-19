@@ -11,14 +11,14 @@ module Hotwire
       config.hotwire_livereload.force_reload_paths ||= []
       config.hotwire_livereload.reload_method = :action_cable
       config.hotwire_livereload.disable_default_listeners = false
-      config.autoload_once_paths = %W(
+      config.autoload_once_paths = %W[
         #{root}/app/channels
         #{root}/app/helpers
-      )
+      ]
 
       initializer "hotwire_livereload.assets" do
         if Rails.application.config.respond_to?(:assets)
-          Rails.application.config.assets.precompile += %w( hotwire-livereload.js hotwire-livereload-turbo-stream.js)
+          Rails.application.config.assets.precompile += %w[hotwire-livereload.js hotwire-livereload-turbo-stream.js]
         end
       end
 
@@ -55,7 +55,7 @@ module Hotwire
           @listener = Listen.to(*listen_paths) do |modified, added, removed|
             unless File.exist?(DISABLE_FILE)
               changed = [modified, removed, added].flatten.uniq
-              return unless changed.any?
+              next unless changed.any?
 
               force_reload = force_reload_paths.present? && changed.any? do |path|
                 path.match(%r{#{force_reload_paths}})
