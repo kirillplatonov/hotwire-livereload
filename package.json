@@ -6,8 +6,8 @@
     "watch": "npm run build -- --watch"
   },
   "dependencies": {
-    "@rails/actioncable": "^6.1.4-1",
+    "@rails/actioncable": "^6.1.7",
     "debounce": "^1.2.1",
-    "esbuild": "^0.12.25"
+    "esbuild": "^0.17.12"
   }
 }
