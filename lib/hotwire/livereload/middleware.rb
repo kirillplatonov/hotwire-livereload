@@ -8,7 +8,7 @@ module Hotwire
       def call(env)
         status, headers, body = @app.call(env)
         request = ActionDispatch::Request.new(env)
-        if status > 0 && ![200, 301, 302].include?(status) && request.method == "GET"
+        if status.to_i > 0 && ![200, 301, 302].include?(status) && request.method == "GET"
           replacement_text = Hotwire::Livereload.error_page_injected_code.call
           body = replace_placeholder(replacement_text, body, headers) if replacement_text
         end
