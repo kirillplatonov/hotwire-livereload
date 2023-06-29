@@ -12,7 +12,7 @@ https://user-images.githubusercontent.com/839922/148676469-0acfa036-832e-4b40-aa
 
 Add `hotwire-livereload` to your Gemfile:
 ```
-bundle add hotwire-livereload
+bundle add hotwire-livereload --group development
 ```
 
 Run installer:
