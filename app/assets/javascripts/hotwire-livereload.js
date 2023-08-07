@@ -5,21 +5,25 @@
   var __getOwnPropNames = Object.getOwnPropertyNames;
   var __getProtoOf = Object.getPrototypeOf;
   var __hasOwnProp = Object.prototype.hasOwnProperty;
-  var __markAsModule = (target) => __defProp(target, "__esModule", { value: true });
   var __commonJS = (cb, mod) => function __require() {
-    return mod || (0, cb[Object.keys(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
   };
-  var __reExport = (target, module, desc) => {
-    if (module && typeof module === "object" || typeof module === "function") {
-      for (let key of __getOwnPropNames(module))
-        if (!__hasOwnProp.call(target, key) && key !== "default")
-          __defProp(target, key, { get: () => module[key], enumerable: !(desc = __getOwnPropDesc(module, key)) || desc.enumerable });
+  var __copyProps = (to, from, except, desc) => {
+    if (from && typeof from === "object" || typeof from === "function") {
+      for (let key of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(to, key) && key !== except)
+          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
     }
-    return target;
+    return to;
   };
-  var __toModule = (module) => {
-    return __reExport(__markAsModule(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", module && module.__esModule && "default" in module ? { get: () => module.default, enumerable: true } : { value: module, enumerable: true })), module);
-  };
+  var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+    // If the importer is in node compatibility mode or this is not an ESM
+    // file that has been converted to a CommonJS file using a Babel-
+    // compatible transform (i.e. "__esModule" has not been set), then set
+    // "default" to the CommonJS "module.exports" for node compatibility.
+    isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+    mod
+  ));
 
   // node_modules/@rails/actioncable/app/assets/javascripts/action_cable.js
   var require_action_cable = __commonJS({
@@ -74,7 +78,7 @@
           };
         }();
         var now = function now2() {
-          return new Date().getTime();
+          return (/* @__PURE__ */ new Date()).getTime();
         };
         var secondsSince = function secondsSince2(time) {
           return (now() - time) / 1e3;
@@ -318,6 +322,7 @@
               case message_types.ping:
                 return this.monitor.recordPing();
               case message_types.confirmation:
+                this.subscriptions.confirmSubscription(identifier);
                 return this.subscriptions.notify(identifier, "connected");
               case message_types.rejection:
                 return this.subscriptions.reject(identifier);
@@ -385,10 +390,52 @@
           };
           return Subscription2;
         }();
+        var SubscriptionGuarantor = function() {
+          function SubscriptionGuarantor2(subscriptions) {
+            classCallCheck(this, SubscriptionGuarantor2);
+            this.subscriptions = subscriptions;
+            this.pendingSubscriptions = [];
+          }
+          SubscriptionGuarantor2.prototype.guarantee = function guarantee(subscription) {
+            if (this.pendingSubscriptions.indexOf(subscription) == -1) {
+              logger.log("SubscriptionGuarantor guaranteeing " + subscription.identifier);
+              this.pendingSubscriptions.push(subscription);
+            } else {
+              logger.log("SubscriptionGuarantor already guaranteeing " + subscription.identifier);
+            }
+            this.startGuaranteeing();
+          };
+          SubscriptionGuarantor2.prototype.forget = function forget(subscription) {
+            logger.log("SubscriptionGuarantor forgetting " + subscription.identifier);
+            this.pendingSubscriptions = this.pendingSubscriptions.filter(function(s) {
+              return s !== subscription;
+            });
+          };
+          SubscriptionGuarantor2.prototype.startGuaranteeing = function startGuaranteeing() {
+            this.stopGuaranteeing();
+            this.retrySubscribing();
+          };
+          SubscriptionGuarantor2.prototype.stopGuaranteeing = function stopGuaranteeing() {
+            clearTimeout(this.retryTimeout);
+          };
+          SubscriptionGuarantor2.prototype.retrySubscribing = function retrySubscribing() {
+            var _this = this;
+            this.retryTimeout = setTimeout(function() {
+              if (_this.subscriptions && typeof _this.subscriptions.subscribe === "function") {
+                _this.pendingSubscriptions.map(function(subscription) {
+                  logger.log("SubscriptionGuarantor resubscribing " + subscription.identifier);
+                  _this.subscriptions.subscribe(subscription);
+                });
+              }
+            }, 500);
+          };
+          return SubscriptionGuarantor2;
+        }();
         var Subscriptions = function() {
           function Subscriptions2(consumer2) {
             classCallCheck(this, Subscriptions2);
             this.consumer = consumer2;
+            this.guarantor = new SubscriptionGuarantor(this);
             this.subscriptions = [];
           }
           Subscriptions2.prototype.create = function create(channelName, mixin) {
@@ -403,7 +450,7 @@
             this.subscriptions.push(subscription);
             this.consumer.ensureActiveConnection();
             this.notify(subscription, "initialized");
-            this.sendCommand(subscription, "subscribe");
+            this.subscribe(subscription);
             return subscription;
           };
           Subscriptions2.prototype.remove = function remove(subscription) {
@@ -422,6 +469,7 @@
             });
           };
           Subscriptions2.prototype.forget = function forget(subscription) {
+            this.guarantor.forget(subscription);
             this.subscriptions = this.subscriptions.filter(function(s) {
               return s !== subscription;
             });
@@ -435,7 +483,7 @@
           Subscriptions2.prototype.reload = function reload() {
             var _this2 = this;
             return this.subscriptions.map(function(subscription) {
-              return _this2.sendCommand(subscription, "subscribe");
+              return _this2.subscribe(subscription);
             });
           };
           Subscriptions2.prototype.notifyAll = function notifyAll(callbackName) {
@@ -459,6 +507,18 @@
             }
             return subscriptions.map(function(subscription2) {
               return typeof subscription2[callbackName] === "function" ? subscription2[callbackName].apply(subscription2, args) : void 0;
+            });
+          };
+          Subscriptions2.prototype.subscribe = function subscribe(subscription) {
+            if (this.sendCommand(subscription, "subscribe")) {
+              this.guarantor.guarantee(subscription);
+            }
+          };
+          Subscriptions2.prototype.confirmSubscription = function confirmSubscription(identifier) {
+            var _this4 = this;
+            logger.log("Subscription confirmed " + identifier);
+            this.findAll(identifier).map(function(subscription) {
+              return _this4.guarantor.forget(subscription);
             });
           };
           Subscriptions2.prototype.sendCommand = function sendCommand(subscription, command) {
@@ -531,6 +591,7 @@
         exports2.INTERNAL = INTERNAL;
         exports2.Subscription = Subscription;
         exports2.Subscriptions = Subscriptions;
+        exports2.SubscriptionGuarantor = SubscriptionGuarantor;
         exports2.adapters = adapters;
         exports2.createWebSocketURL = createWebSocketURL;
         exports2.logger = logger;
@@ -546,9 +607,9 @@
   // node_modules/debounce/index.js
   var require_debounce = __commonJS({
     "node_modules/debounce/index.js"(exports, module) {
-      function debounce2(func, wait, immediate) {
+      function debounce3(func, wait, immediate) {
         var timeout, args, context, timestamp, result;
-        if (wait == null)
+        if (null == wait)
           wait = 100;
         function later() {
           var last = Date.now() - timestamp;
@@ -592,16 +653,16 @@
         };
         return debounced;
       }
-      debounce2.debounce = debounce2;
-      module.exports = debounce2;
+      debounce3.debounce = debounce3;
+      module.exports = debounce3;
     }
   });
 
   // app/javascript/hotwire-livereload.js
-  var import_actioncable = __toModule(require_action_cable());
+  var import_actioncable = __toESM(require_action_cable());
 
   // app/javascript/lib/hotwire-livereload-received.js
-  var import_debounce = __toModule(require_debounce());
+  var import_debounce = __toESM(require_debounce());
   var hotwire_livereload_received_default = (0, import_debounce.default)(({ force_reload }) => {
     const onErrorPage = document.title === "Action Controller: Exception caught";
     if (onErrorPage || force_reload) {
@@ -613,7 +674,27 @@
     }
   }, 300);
 
+  // app/javascript/lib/hotwire-livereload-scroll-position.js
+  var KEY = "hotwire-livereload-scrollPosition";
+  function read() {
+    const value = localStorage.getItem(KEY);
+    if (!value)
+      return 0;
+    return parseInt(value);
+  }
+  function save() {
+    const pos = window.scrollY;
+    localStorage.setItem(KEY, pos.toString());
+  }
+  function reset() {
+    const value = read();
+    console.log("[Hotwire::Livereload] Restoring scroll position to", value);
+    window.scrollTo(0, value);
+  }
+  var hotwire_livereload_scroll_position_default = { read, save, reset };
+
   // app/javascript/hotwire-livereload.js
+  var import_debounce2 = __toESM(require_debounce());
   var consumer = (0, import_actioncable.createConsumer)();
   consumer.subscriptions.create("Hotwire::Livereload::ReloadChannel", {
     received: hotwire_livereload_received_default,
@@ -624,4 +705,9 @@
       console.log("[Hotwire::Livereload] Websocket disconnected");
     }
   });
+  window.addEventListener("scroll", (0, import_debounce2.default)(hotwire_livereload_scroll_position_default.save, 100));
+  document.addEventListener("turbo:before-visit", hotwire_livereload_scroll_position_default.save);
+  document.addEventListener("turbo:load", hotwire_livereload_scroll_position_default.reset);
+  document.addEventListener("DOMContentLoaded", hotwire_livereload_scroll_position_default.reset);
+  document.addEventListener("turbo:frame-load", hotwire_livereload_scroll_position_default.reset);
 })();
