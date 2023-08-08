@@ -705,7 +705,13 @@
       console.log("[Hotwire::Livereload] Websocket disconnected");
     }
   });
-  window.addEventListener("scroll", (0, import_debounce2.default)(hotwire_livereload_scroll_position_default.save, 100));
+  var debouncedScroll = (0, import_debounce2.default)(() => {
+    if (window.scrollY === 0) {
+    } else {
+      hotwire_livereload_scroll_position_default.save();
+    }
+  }, 100);
+  window.addEventListener("scroll", debouncedScroll);
   document.addEventListener("turbo:before-visit", hotwire_livereload_scroll_position_default.save);
   document.addEventListener("turbo:load", hotwire_livereload_scroll_position_default.reset);
   document.addEventListener("DOMContentLoaded", hotwire_livereload_scroll_position_default.reset);

@@ -16,7 +16,15 @@ consumer.subscriptions.create("Hotwire::Livereload::ReloadChannel", {
   },
 })
 
-window.addEventListener("scroll", debounce(scrollPosition.save, 100))
+const debouncedScroll = debounce(() => {
+  if (window.scrollY === 0) {
+    // On a second update, the page mysteriously jumps to the top and sends a scroll event.
+    // This avoids overriding the saved position.
+  } else {
+    scrollPosition.save()
+  }
+}, 100)
+window.addEventListener("scroll", debouncedScroll)
 document.addEventListener("turbo:before-visit", scrollPosition.save)
 document.addEventListener("turbo:load", scrollPosition.reset)
 document.addEventListener("DOMContentLoaded", scrollPosition.reset)
