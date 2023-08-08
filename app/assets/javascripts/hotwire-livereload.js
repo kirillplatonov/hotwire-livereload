@@ -687,11 +687,14 @@
     localStorage.setItem(KEY, pos.toString());
   }
   function reset() {
+    localStorage.setItem(KEY, "0");
+  }
+  function restore() {
     const value = read();
     console.log("[Hotwire::Livereload] Restoring scroll position to", value);
     window.scrollTo(0, value);
   }
-  var hotwire_livereload_scroll_position_default = { read, save, reset };
+  var hotwire_livereload_scroll_position_default = { read, save, restore, reset };
 
   // app/javascript/hotwire-livereload.js
   var import_debounce2 = __toESM(require_debounce());
@@ -712,8 +715,9 @@
     }
   }, 100);
   window.addEventListener("scroll", debouncedScroll);
-  document.addEventListener("turbo:before-visit", hotwire_livereload_scroll_position_default.save);
-  document.addEventListener("turbo:load", hotwire_livereload_scroll_position_default.reset);
-  document.addEventListener("DOMContentLoaded", hotwire_livereload_scroll_position_default.reset);
-  document.addEventListener("turbo:frame-load", hotwire_livereload_scroll_position_default.reset);
+  document.addEventListener("turbo:click", hotwire_livereload_scroll_position_default.reset);
+  document.addEventListener("turbo:before-visit", hotwire_livereload_scroll_position_default.restore);
+  document.addEventListener("turbo:load", hotwire_livereload_scroll_position_default.restore);
+  document.addEventListener("DOMContentLoaded", hotwire_livereload_scroll_position_default.restore);
+  document.addEventListener("turbo:frame-load", hotwire_livereload_scroll_position_default.restore);
 })();

@@ -12,9 +12,13 @@ export function save() {
 }
 
 export function reset() {
+  localStorage.setItem(KEY, "0");
+}
+
+export function restore() {
   const value = read()
   console.log("[Hotwire::Livereload] Restoring scroll position to", value)
   window.scrollTo(0, value)
 }
 
-export default { read, save, reset }
+export default { read, save, restore, reset }

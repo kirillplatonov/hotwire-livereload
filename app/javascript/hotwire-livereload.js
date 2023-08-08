@@ -25,8 +25,10 @@ const debouncedScroll = debounce(() => {
   }
 }, 100)
 window.addEventListener("scroll", debouncedScroll)
-document.addEventListener("turbo:before-visit", scrollPosition.save)
-document.addEventListener("turbo:load", scrollPosition.reset)
-document.addEventListener("DOMContentLoaded", scrollPosition.reset)
-document.addEventListener("turbo:frame-load", scrollPosition.reset)
+
+document.addEventListener("turbo:click", scrollPosition.reset)
+document.addEventListener("turbo:before-visit", scrollPosition.restore)
+document.addEventListener("turbo:load", scrollPosition.restore)
+document.addEventListener("DOMContentLoaded", scrollPosition.restore)
+document.addEventListener("turbo:frame-load", scrollPosition.restore)
 
