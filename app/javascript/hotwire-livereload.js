@@ -17,12 +17,14 @@ consumer.subscriptions.create("Hotwire::Livereload::ReloadChannel", {
 })
 
 const debouncedScroll = debounce(() => {
-  if (window.scrollY === 0) {
-    // On a second update, the page mysteriously jumps to the top and sends a scroll event.
-    // This avoids overriding the saved position.
-  } else {
-    scrollPosition.save()
-  }
+  if (window.scrollY !== 0) return scrollPosition.save();
+
+  // On a second update, the page mysteriously jumps to the top and sends a scroll event.
+  // So we wait a bit and if the page is still is at the top, it was likely on purpose.
+  setTimeout(() => {
+    if (window.scrollY !== 0) return;
+    scrollPosition.save();
+  }, 1000);
 }, 100)
 window.addEventListener("scroll", debouncedScroll)
 

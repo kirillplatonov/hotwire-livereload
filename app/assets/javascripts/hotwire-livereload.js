@@ -709,10 +709,13 @@
     }
   });
   var debouncedScroll = (0, import_debounce2.default)(() => {
-    if (window.scrollY === 0) {
-    } else {
+    if (window.scrollY !== 0)
+      return hotwire_livereload_scroll_position_default.save();
+    setTimeout(() => {
+      if (window.scrollY !== 0)
+        return;
       hotwire_livereload_scroll_position_default.save();
-    }
+    }, 1e3);
   }, 100);
   window.addEventListener("scroll", debouncedScroll);
   document.addEventListener("turbo:click", hotwire_livereload_scroll_position_default.reset);
