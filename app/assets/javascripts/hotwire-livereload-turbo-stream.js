@@ -81,6 +81,30 @@
 
   // app/javascript/lib/hotwire-livereload-received.js
   var import_debounce = __toESM(require_debounce());
+
+  // app/javascript/lib/hotwire-livereload-scroll-position.js
+  var KEY = "hotwire-livereload-scrollPosition";
+  function read() {
+    const value = localStorage.getItem(KEY);
+    if (!value)
+      return 0;
+    return parseInt(value);
+  }
+  function save() {
+    const pos = window.scrollY;
+    localStorage.setItem(KEY, pos.toString());
+  }
+  function reset() {
+    localStorage.setItem(KEY, "0");
+  }
+  function restore() {
+    const value = read();
+    console.log("[Hotwire::Livereload] Restoring scroll position to", value);
+    window.scrollTo(0, value);
+  }
+  var hotwire_livereload_scroll_position_default = { read, save, restore, reset };
+
+  // app/javascript/lib/hotwire-livereload-received.js
   var hotwire_livereload_received_default = (0, import_debounce.default)(({ force_reload }) => {
     const onErrorPage = document.title === "Action Controller: Exception caught";
     if (onErrorPage || force_reload) {
@@ -88,6 +112,7 @@
       document.location.reload();
     } else {
       console.log("[Hotwire::Livereload] Files changed. Reloading..");
+      hotwire_livereload_scroll_position_default.save();
       Turbo.visit(window.location.href, { action: "replace" });
     }
   }, 300);
