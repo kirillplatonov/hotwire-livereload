@@ -17,6 +17,6 @@ consumer.subscriptions.create("Hotwire::Livereload::ReloadChannel", {
 
 document.addEventListener("turbo:load", () => {
   scrollPosition.restore()
-  scrollPosition.reset()
+  scrollPosition.remove()
 })
 

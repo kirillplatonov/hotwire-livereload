@@ -87,22 +87,24 @@
   function read() {
     const value = localStorage.getItem(KEY);
     if (!value)
-      return 0;
+      return null;
     return parseInt(value);
   }
   function save() {
     const pos = window.scrollY;
     localStorage.setItem(KEY, pos.toString());
   }
-  function reset() {
-    localStorage.setItem(KEY, "0");
+  function remove() {
+    localStorage.removeItem(KEY, "0");
   }
   function restore() {
     const value = read();
-    console.log("[Hotwire::Livereload] Restoring scroll position to", value);
-    window.scrollTo(0, value);
+    if (value) {
+      console.log("[Hotwire::Livereload] Restoring scroll position to", value);
+      window.scrollTo(0, value);
+    }
   }
-  var hotwire_livereload_scroll_position_default = { read, save, restore, reset };
+  var hotwire_livereload_scroll_position_default = { read, save, restore, remove };
 
   // app/javascript/lib/hotwire-livereload-received.js
   var hotwire_livereload_received_default = (0, import_debounce.default)(({ force_reload }) => {
