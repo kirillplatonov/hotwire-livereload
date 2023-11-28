@@ -2,7 +2,7 @@ const KEY = "hotwire-livereload-scrollPosition"
 
 export function read() {
   const value = localStorage.getItem(KEY)
-  if (!value) return null;
+  if (!value) return
   return parseInt(value)
 }
 
