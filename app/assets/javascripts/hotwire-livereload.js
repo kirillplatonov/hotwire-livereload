@@ -453,7 +453,7 @@
             this.subscribe(subscription);
             return subscription;
           };
-          Subscriptions2.prototype.remove = function remove(subscription) {
+          Subscriptions2.prototype.remove = function remove2(subscription) {
             this.forget(subscription);
             if (!this.findAll(subscription.identifier).length) {
               this.sendCommand(subscription, "unsubscribe");
@@ -607,7 +607,7 @@
   // node_modules/debounce/index.js
   var require_debounce = __commonJS({
     "node_modules/debounce/index.js"(exports, module) {
-      function debounce3(func, wait, immediate) {
+      function debounce2(func, wait, immediate) {
         var timeout, args, context, timestamp, result;
         if (null == wait)
           wait = 100;
@@ -653,8 +653,8 @@
         };
         return debounced;
       }
-      debounce3.debounce = debounce3;
-      module.exports = debounce3;
+      debounce2.debounce = debounce2;
+      module.exports = debounce2;
     }
   });
 
@@ -663,6 +663,32 @@
 
   // app/javascript/lib/hotwire-livereload-received.js
   var import_debounce = __toESM(require_debounce());
+
+  // app/javascript/lib/hotwire-livereload-scroll-position.js
+  var KEY = "hotwire-livereload-scrollPosition";
+  function read() {
+    const value = localStorage.getItem(KEY);
+    if (!value)
+      return null;
+    return parseInt(value);
+  }
+  function save() {
+    const pos = window.scrollY;
+    localStorage.setItem(KEY, pos.toString());
+  }
+  function remove() {
+    localStorage.removeItem(KEY, "0");
+  }
+  function restore() {
+    const value = read();
+    if (value) {
+      console.log("[Hotwire::Livereload] Restoring scroll position to", value);
+      window.scrollTo(0, value);
+    }
+  }
+  var hotwire_livereload_scroll_position_default = { read, save, restore, remove };
+
+  // app/javascript/lib/hotwire-livereload-received.js
   var hotwire_livereload_received_default = (0, import_debounce.default)(({ force_reload }) => {
     const onErrorPage = document.title === "Action Controller: Exception caught";
     if (onErrorPage || force_reload) {
@@ -670,34 +696,12 @@
       document.location.reload();
     } else {
       console.log("[Hotwire::Livereload] Files changed. Reloading..");
+      hotwire_livereload_scroll_position_default.save();
       Turbo.visit(window.location.href, { action: "replace" });
     }
   }, 300);
 
-  // app/javascript/lib/hotwire-livereload-scroll-position.js
-  var KEY = "hotwire-livereload-scrollPosition";
-  function read() {
-    const value = localStorage.getItem(KEY);
-    if (!value)
-      return 0;
-    return parseInt(value);
-  }
-  function save() {
-    const pos = window.scrollY;
-    localStorage.setItem(KEY, pos.toString());
-  }
-  function reset() {
-    localStorage.setItem(KEY, "0");
-  }
-  function restore() {
-    const value = read();
-    console.log("[Hotwire::Livereload] Restoring scroll position to", value);
-    window.scrollTo(0, value);
-  }
-  var hotwire_livereload_scroll_position_default = { read, save, restore, reset };
-
   // app/javascript/hotwire-livereload.js
-  var import_debounce2 = __toESM(require_debounce());
   var consumer = (0, import_actioncable.createConsumer)();
   consumer.subscriptions.create("Hotwire::Livereload::ReloadChannel", {
     received: hotwire_livereload_received_default,
@@ -708,19 +712,8 @@
       console.log("[Hotwire::Livereload] Websocket disconnected");
     }
   });
-  var debouncedScroll = (0, import_debounce2.default)(() => {
-    if (window.scrollY !== 0)
-      return hotwire_livereload_scroll_position_default.save();
-    setTimeout(() => {
-      if (window.scrollY !== 0)
-        return;
-      hotwire_livereload_scroll_position_default.save();
-    }, 1e3);
-  }, 100);
-  window.addEventListener("scroll", debouncedScroll);
-  document.addEventListener("turbo:click", hotwire_livereload_scroll_position_default.reset);
-  document.addEventListener("turbo:before-visit", hotwire_livereload_scroll_position_default.restore);
-  document.addEventListener("turbo:load", hotwire_livereload_scroll_position_default.restore);
-  document.addEventListener("DOMContentLoaded", hotwire_livereload_scroll_position_default.restore);
-  document.addEventListener("turbo:frame-load", hotwire_livereload_scroll_position_default.restore);
+  document.addEventListener("turbo:load", () => {
+    hotwire_livereload_scroll_position_default.restore();
+    hotwire_livereload_scroll_position_default.remove();
+  });
 })();

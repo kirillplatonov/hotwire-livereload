@@ -1,4 +1,5 @@
 import debounce from "debounce"
+import scrollPosition from "./hotwire-livereload-scroll-position"
 
 export default debounce(({force_reload}) => {
   const onErrorPage = document.title === "Action Controller: Exception caught"
@@ -8,6 +9,7 @@ export default debounce(({force_reload}) => {
     document.location.reload()
   } else {
     console.log("[Hotwire::Livereload] Files changed. Reloading..")
+    scrollPosition.save()
     Turbo.visit(window.location.href, { action: 'replace' })
   }
 }, 300)
