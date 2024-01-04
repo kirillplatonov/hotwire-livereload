@@ -87,7 +87,7 @@
   function read() {
     const value = localStorage.getItem(KEY);
     if (!value)
-      return null;
+      return;
     return parseInt(value);
   }
   function save() {
@@ -95,7 +95,7 @@
     localStorage.setItem(KEY, pos.toString());
   }
   function remove() {
-    localStorage.removeItem(KEY, "0");
+    localStorage.removeItem(KEY);
   }
   function restore() {
     const value = read();
