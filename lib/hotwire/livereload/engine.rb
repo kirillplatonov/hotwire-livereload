@@ -8,6 +8,7 @@ module Hotwire
       isolate_namespace Hotwire::Livereload
       config.hotwire_livereload = ActiveSupport::OrderedOptions.new
       config.hotwire_livereload.listen_paths ||= []
+      config.hotwire_livereload.skip_listen_paths ||= []
       config.hotwire_livereload.force_reload_paths ||= []
       config.hotwire_livereload.reload_method = :action_cable
       config.hotwire_livereload.disable_default_listeners = false
@@ -30,6 +31,7 @@ module Hotwire
 
       initializer "hotwire_livereload.set_configs" do |app|
         options = app.config.hotwire_livereload
+        skip_listen_paths = options.skip_listen_paths.map(&:to_s).uniq
 
         unless options.disable_default_listeners
           default_listen_paths = %w[
@@ -54,6 +56,7 @@ module Hotwire
             .uniq
             .map { |p| Rails.root.join(p) }
             .select { |p| Dir.exist?(p) }
+            .reject { |p| skip_listen_paths.include?(p.to_s) }
         end
       end
 
