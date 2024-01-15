@@ -115,6 +115,7 @@
     } else {
       console.log("[Hotwire::Livereload] Files changed. Reloading..");
       hotwire_livereload_scroll_position_default.save();
+      Turbo.cache.clear();
       Turbo.visit(window.location.href, { action: "replace" });
     }
   }, 300);
