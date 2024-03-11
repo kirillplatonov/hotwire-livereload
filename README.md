@@ -90,6 +90,20 @@ In that case you need to place `hotwire_livereload_tags` helper in your layout *
 </head>
 ```
 
+[Listen gem](https://github.com/guard/listen), which is used for file system monitoring, accepts [options](https://github.com/guard/listen?tab=readme-ov-file#options) like enabling a fallback mechanism called "polling" to detect file changes.
+
+By default, Listen uses a more efficient mechanism called "native" which relies on the operating system's file system events to detect changes. However, in some cases, such as when working with network-mounted file systems or in certain virtualized environments, the native mechanism may not work reliably. In such cases, enabling force_polling ensures that file changes are still detected, albeit with a slightly higher resource usage.
+
+You may use listen_to_options to pass these options like:
+```ruby
+# config/environments/development.rb
+
+Rails.application.configure do
+  # ...
+  config.hotwire_livereload.listen_to_options[:force_polling] = true
+end
+```
+
 ## Disable livereload
 
 To temporarily disable livereload use:

@@ -15,6 +15,7 @@ module Hotwire
         #{root}/app/channels
         #{root}/app/helpers
       ]
+      config.hotwire_livereload.listen_to_options ||= {}
 
       initializer "hotwire_livereload.assets" do
         if Rails.application.config.respond_to?(:assets)
@@ -63,7 +64,7 @@ module Hotwire
           listen_paths = options.listen_paths.map(&:to_s).uniq
           force_reload_paths = options.force_reload_paths.map(&:to_s).uniq.join("|")
 
-          @listener = Listen.to(*listen_paths) do |modified, added, removed|
+          @listener = Listen.to(*listen_paths, **config.hotwire_livereload.listen_to_options) do |modified, added, removed|
             unless File.exist?(DISABLE_FILE)
               changed = [modified, removed, added].flatten.uniq
               next unless changed.any?
