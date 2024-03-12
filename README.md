@@ -44,6 +44,16 @@ Rails.application.configure do
 end
 ```
 
+You can skip one or few default listen paths:
+```ruby
+# config/environments/development.rb
+
+Rails.application.configure do
+  # ...
+  config.hotwire_livereload.skip_listen_paths << Rails.root.join("app/views")
+end
+```
+
 You can disable default listen paths and fully override them:
 ```ruby
 # config/environments/development.rb
@@ -67,6 +77,14 @@ Rails.application.configure do
   config.hotwire_livereload.force_reload_paths << Rails.root.join("app/assets/stylesheets")
   config.hotwire_livereload.force_reload_paths << Rails.root.join("app/javascript")
 end
+```
+
+When you use Tailwind, it will also listen for changes in views/helpers/javascript, and then generate new CSS file in `app/assets/builds` folder. This can cause multiple reloads and the scroll position will be lost. To avoid that, you can skip listening to the folders that are used by Tailwind:
+```ruby
+  # ...
+  config.hotwire_livereload.skip_listen_paths << Rails.root.join("app/helpers")
+  config.hotwire_livereload.skip_listen_paths << Rails.root.join("app/javascript")
+  config.hotwire_livereload.skip_listen_paths << Rails.root.join("app/views")
 ```
 
 Instead of a direct ActionCable websocket connection, you can reuse the existing TurboStream websocket connection and send updates using standard turbo-streams:
