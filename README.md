@@ -34,6 +34,8 @@ The gem detects if you use [`jsbundling-rails`](https://github.com/rails/jsbundl
 
 ## Configuration
 
+### Listen paths
+
 You can watch for changes in additional folders by adding them to `listen_paths`:
 ```ruby
 # config/environments/development.rb
@@ -58,6 +60,8 @@ Rails.application.configure do
 end
 ```
 
+### Force reload
+
 If you don't have `data-turbo-track="reload"` attribute on your JS and CSS bundles you might need to setup force reloading. This will trigger full browser reloading for JS and CSS files only:
 ```ruby
 # config/environments/development.rb
@@ -68,6 +72,8 @@ Rails.application.configure do
   config.hotwire_livereload.force_reload_paths << Rails.root.join("app/javascript")
 end
 ```
+
+### Reload method
 
 Instead of a direct ActionCable websocket connection, you can reuse the existing TurboStream websocket connection and send updates using standard turbo-streams:
 ```ruby
@@ -89,6 +95,8 @@ In that case you need to place `hotwire_livereload_tags` helper in your layout *
   ...
 </head>
 ```
+
+### Listen options
 
 [Listen gem](https://github.com/guard/listen), which is used for file system monitoring, accepts [options](https://github.com/guard/listen?tab=readme-ov-file#options) like enabling a fallback mechanism called "polling" to detect file changes.
 
