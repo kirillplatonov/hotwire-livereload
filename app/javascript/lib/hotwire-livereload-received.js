@@ -10,6 +10,7 @@ export default debounce(({force_reload}) => {
   } else {
     console.log("[Hotwire::Livereload] Files changed. Reloading..")
     scrollPosition.save()
+    Turbo.cache.clear()
     Turbo.visit(window.location.href, { action: 'replace' })
   }
 }, 300)
