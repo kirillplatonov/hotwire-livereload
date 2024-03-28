@@ -9,7 +9,7 @@ fi
 printf "module Hotwire\n  module Livereload\n    VERSION = \"$VERSION\"\n  end\nend\n" > ./lib/hotwire/livereload/version.rb
 bundle
 npm install
-npm build
+npm run build
 git add Gemfile.lock lib/hotwire/livereload/version.rb app/assets/javascripts/hotwire-livereload.js app/assets/javascripts/hotwire-livereload-turbo-stream.js
 git commit -m "Bump version for $VERSION"
 git push
