@@ -119,7 +119,7 @@ module Hotwire
 
     def self.debounce(wait_ms, &block)
       if wait_ms.zero?
-        return -> (*args) { yield(*args) }
+        return ->(*args) { yield(*args) }
       end
 
       mutex = Mutex.new
