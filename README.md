@@ -112,6 +112,21 @@ Rails.application.configure do
 end
 ```
 
+### Listen debounce delay
+
+If your app uses TailwindCSS or similar that compiles your CSS from looking at your templates, you can end up in a situation, where updating a template triggers twice for changes; once for the template and once for the rebuilt CSS. This can lead to unreliable reloads, ie. the reload happening before the CSS is built.
+
+To avoid this, you can add a debounce delay to the file watcher:
+
+```ruby
+# config/environments/development.rb
+
+Rails.application.configure do
+  # ...
+  config.hotwire_livereload.debounce_delay_ms = 300 # in milliseconds
+end
+```
+
 ## Disable livereload
 
 To temporarily disable livereload use:
