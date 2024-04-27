@@ -20,7 +20,7 @@ Run installer:
 rails livereload:install
 ```
 
-Folders listened by default:
+Folders watched by default:
 - `app/views`
 - `app/helpers`
 - `app/javascript`
@@ -31,6 +31,12 @@ Folders listened by default:
 - `config/locales`
 
 The gem detects if you use [`jsbundling-rails`](https://github.com/rails/jsbundling-rails) or [`cssbundling-rails`](https://github.com/rails/cssbundling-rails) and watches for changes in their output folder `app/assets/builds` automatically.
+
+In your layout, make sure you don't `turbo-track` your JS/CSS in development:
+```diff
++ <%= stylesheet_link_tag "application", "data-turbo-track": Rails.env.production? ? "reload" : "" %>
+- <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+```
 
 ## Configuration
 
