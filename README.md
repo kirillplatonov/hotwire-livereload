@@ -52,6 +52,16 @@ Rails.application.configure do
 end
 ```
 
+You can skip one or few default listen paths:
+```ruby
+# config/environments/development.rb
+
+Rails.application.configure do
+  # ...
+  config.hotwire_livereload.skip_listen_paths << Rails.root.join("app/views")
+end
+```
+
 You can disable default listen paths and fully override them:
 ```ruby
 # config/environments/development.rb
