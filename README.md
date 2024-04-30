@@ -20,7 +20,7 @@ Run installer:
 rails livereload:install
 ```
 
-Folders listened by default:
+Folders watched by default:
 - `app/views`
 - `app/helpers`
 - `app/javascript`
@@ -31,6 +31,12 @@ Folders listened by default:
 - `config/locales`
 
 The gem detects if you use [`jsbundling-rails`](https://github.com/rails/jsbundling-rails) or [`cssbundling-rails`](https://github.com/rails/cssbundling-rails) and watches for changes in their output folder `app/assets/builds` automatically.
+
+In your layout, make sure you don't `turbo-track` your JS/CSS in development:
+```diff
++ <%= stylesheet_link_tag "application", "data-turbo-track": Rails.env.production? ? "reload" : "" %>
+- <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+```
 
 ## Configuration
 
@@ -109,6 +115,21 @@ You may use listen_options to pass these options like:
 Rails.application.configure do
   # ...
   config.hotwire_livereload.listen_options[:force_polling] = true
+end
+```
+
+### Listen debounce delay
+
+If your app uses TailwindCSS or similar that compiles your CSS from looking at your templates, you can end up in a situation, where updating a template triggers twice for changes; once for the template and once for the rebuilt CSS. This can lead to unreliable reloads, ie. the reload happening before the CSS is built.
+
+To avoid this, you can add a debounce delay to the file watcher:
+
+```ruby
+# config/environments/development.rb
+
+Rails.application.configure do
+  # ...
+  config.hotwire_livereload.debounce_delay_ms = 300 # in milliseconds
 end
 ```
 

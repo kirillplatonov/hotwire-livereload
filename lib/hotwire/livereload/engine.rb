@@ -16,6 +16,7 @@ module Hotwire
         #{root}/app/helpers
       ]
       config.hotwire_livereload.listen_options ||= {}
+      config.hotwire_livereload.debounce_delay_ms = 0
 
       initializer "hotwire_livereload.assets" do
         if Rails.application.config.respond_to?(:assets)
@@ -60,6 +61,14 @@ module Hotwire
 
       config.after_initialize do |app|
         if Rails.env.development? && Hotwire::Livereload.server_process?
+          @trigger_reload = (Hotwire::Livereload.debounce(config.hotwire_livereload.debounce_delay_ms) do |options|
+            if config.hotwire_livereload.reload_method == :turbo_stream
+              Hotwire::Livereload.turbo_stream(options)
+            else
+              Hotwire::Livereload.action_cable(options)
+            end
+          end)
+
           options = app.config.hotwire_livereload
           listen_paths = options.listen_paths.map(&:to_s).uniq
           force_reload_paths = options.force_reload_paths.map(&:to_s).uniq.join("|")
@@ -74,11 +83,7 @@ module Hotwire
               end
 
               options = {changed: changed, force_reload: force_reload}
-              if config.hotwire_livereload.reload_method == :turbo_stream
-                Hotwire::Livereload.turbo_stream(options)
-              else
-                Hotwire::Livereload.action_cable(options)
-              end
+              @trigger_reload.call(options)
             end
           end
           @listener.start
@@ -110,6 +115,28 @@ module Hotwire
       rails_server = defined?(Rails::Server)
 
       puma_process || rails_server
+    end
+
+    def self.debounce(wait_ms, &block)
+      if wait_ms.zero?
+        return ->(*args) { yield(*args) }
+      end
+
+      mutex = Mutex.new
+      timer_thread = nil
+      seconds = wait_ms.to_f / 1000.0
+
+      lambda do |*args|
+        mutex.synchronize do
+          # Cancel previous timer
+          timer_thread&.kill
+
+          timer_thread = Thread.new do
+            sleep(seconds)
+            yield(*args)
+          end
+        end
+      end
     end
   end
 end
