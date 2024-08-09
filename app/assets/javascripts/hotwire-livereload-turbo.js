@@ -10,21 +10,21 @@
       __defProp(target, name, { get: all[name], enumerable: true });
   };
 
-  // node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/adapters.js
+  // node_modules/@rails/actioncable/src/adapters.js
   var adapters_default;
   var init_adapters = __esm({
-    "node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/adapters.js"() {
+    "node_modules/@rails/actioncable/src/adapters.js"() {
       adapters_default = {
-        logger: self.console,
-        WebSocket: self.WebSocket
+        logger: typeof console !== "undefined" ? console : void 0,
+        WebSocket: typeof WebSocket !== "undefined" ? WebSocket : void 0
       };
     }
   });
 
-  // node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/logger.js
+  // node_modules/@rails/actioncable/src/logger.js
   var logger_default;
   var init_logger = __esm({
-    "node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/logger.js"() {
+    "node_modules/@rails/actioncable/src/logger.js"() {
       init_adapters();
       logger_default = {
         log(...messages) {
@@ -37,10 +37,10 @@
     }
   });
 
-  // node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/connection_monitor.js
+  // node_modules/@rails/actioncable/src/connection_monitor.js
   var now, secondsSince, ConnectionMonitor, connection_monitor_default;
   var init_connection_monitor = __esm({
-    "node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/connection_monitor.js"() {
+    "node_modules/@rails/actioncable/src/connection_monitor.js"() {
       init_logger();
       now = () => new Date().getTime();
       secondsSince = (time) => (now() - time) / 1e3;
@@ -141,10 +141,10 @@
     }
   });
 
-  // node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/internal.js
+  // node_modules/@rails/actioncable/src/internal.js
   var internal_default;
   var init_internal = __esm({
-    "node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/internal.js"() {
+    "node_modules/@rails/actioncable/src/internal.js"() {
       internal_default = {
         "message_types": {
           "welcome": "welcome",
@@ -156,7 +156,8 @@
         "disconnect_reasons": {
           "unauthorized": "unauthorized",
           "invalid_request": "invalid_request",
-          "server_restart": "server_restart"
+          "server_restart": "server_restart",
+          "remote": "remote"
         },
         "default_mount_path": "/cable",
         "protocols": [
@@ -167,10 +168,10 @@
     }
   });
 
-  // node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/connection.js
+  // node_modules/@rails/actioncable/src/connection.js
   var message_types, protocols, supportedProtocols, indexOf, Connection, connection_default;
   var init_connection = __esm({
-    "node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/connection.js"() {
+    "node_modules/@rails/actioncable/src/connection.js"() {
       init_adapters();
       init_connection_monitor();
       init_internal();
@@ -199,11 +200,12 @@
             logger_default.log(`Attempted to open WebSocket, but existing socket is ${this.getState()}`);
             return false;
           } else {
-            logger_default.log(`Opening WebSocket, current state is ${this.getState()}, subprotocols: ${protocols}`);
+            const socketProtocols = [...protocols, ...this.consumer.subprotocols || []];
+            logger_default.log(`Opening WebSocket, current state is ${this.getState()}, subprotocols: ${socketProtocols}`);
             if (this.webSocket) {
               this.uninstallEventHandlers();
             }
-            this.webSocket = new adapters_default.WebSocket(this.consumer.url, protocols);
+            this.webSocket = new adapters_default.WebSocket(this.consumer.url, socketProtocols);
             this.installEventHandlers();
             this.monitor.start();
             return true;
@@ -243,6 +245,9 @@
         isActive() {
           return this.isState("open", "connecting");
         }
+        triedToReconnect() {
+          return this.monitor.reconnectAttempts > 0;
+        }
         isProtocolSupported() {
           return indexOf.call(supportedProtocols, this.getProtocol()) >= 0;
         }
@@ -281,6 +286,9 @@
           const { identifier, message, reason, reconnect, type } = JSON.parse(event.data);
           switch (type) {
             case message_types.welcome:
+              if (this.triedToReconnect()) {
+                this.reconnectAttempted = true;
+              }
               this.monitor.recordConnect();
               return this.subscriptions.reload();
             case message_types.disconnect:
@@ -290,7 +298,12 @@
               return this.monitor.recordPing();
             case message_types.confirmation:
               this.subscriptions.confirmSubscription(identifier);
-              return this.subscriptions.notify(identifier, "connected");
+              if (this.reconnectAttempted) {
+                this.reconnectAttempted = false;
+                return this.subscriptions.notify(identifier, "connected", { reconnected: true });
+              } else {
+                return this.subscriptions.notify(identifier, "connected", { reconnected: false });
+              }
             case message_types.rejection:
               return this.subscriptions.reject(identifier);
             default:
@@ -322,10 +335,10 @@
     }
   });
 
-  // node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/subscription.js
+  // node_modules/@rails/actioncable/src/subscription.js
   var extend, Subscription;
   var init_subscription = __esm({
-    "node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/subscription.js"() {
+    "node_modules/@rails/actioncable/src/subscription.js"() {
       extend = function(object, properties) {
         if (properties != null) {
           for (let key in properties) {
@@ -355,10 +368,10 @@
     }
   });
 
-  // node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/subscription_guarantor.js
+  // node_modules/@rails/actioncable/src/subscription_guarantor.js
   var SubscriptionGuarantor, subscription_guarantor_default;
   var init_subscription_guarantor = __esm({
-    "node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/subscription_guarantor.js"() {
+    "node_modules/@rails/actioncable/src/subscription_guarantor.js"() {
       init_logger();
       SubscriptionGuarantor = class {
         constructor(subscriptions) {
@@ -400,10 +413,10 @@
     }
   });
 
-  // node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/subscriptions.js
+  // node_modules/@rails/actioncable/src/subscriptions.js
   var Subscriptions;
   var init_subscriptions = __esm({
-    "node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/subscriptions.js"() {
+    "node_modules/@rails/actioncable/src/subscriptions.js"() {
       init_subscription();
       init_subscription_guarantor();
       init_logger();
@@ -480,7 +493,7 @@
     }
   });
 
-  // node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/consumer.js
+  // node_modules/@rails/actioncable/src/consumer.js
   function createWebSocketURL(url) {
     if (typeof url === "function") {
       url = url();
@@ -497,7 +510,7 @@
   }
   var Consumer;
   var init_consumer = __esm({
-    "node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/consumer.js"() {
+    "node_modules/@rails/actioncable/src/consumer.js"() {
       init_connection();
       init_subscriptions();
       Consumer = class {
@@ -505,6 +518,7 @@
           this._url = url;
           this.subscriptions = new Subscriptions(this);
           this.connection = new connection_default(this);
+          this.subprotocols = [];
         }
         get url() {
           return createWebSocketURL(this._url);
@@ -523,11 +537,14 @@
             return this.connection.open();
           }
         }
+        addSubProtocol(subprotocol) {
+          this.subprotocols = [...this.subprotocols, subprotocol];
+        }
       };
     }
   });
 
-  // node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/index.js
+  // node_modules/@rails/actioncable/src/index.js
   var src_exports = {};
   __export(src_exports, {
     Connection: () => connection_default,
@@ -553,7 +570,7 @@
     }
   }
   var init_src = __esm({
-    "node_modules/@hotwired/turbo-rails/node_modules/@rails/actioncable/src/index.js"() {
+    "node_modules/@rails/actioncable/src/index.js"() {
       init_connection();
       init_connection_monitor();
       init_consumer();
