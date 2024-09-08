@@ -396,19 +396,19 @@
             this.subscriptions = subscriptions;
             this.pendingSubscriptions = [];
           }
-          SubscriptionGuarantor2.prototype.guarantee = function guarantee(subscription) {
-            if (this.pendingSubscriptions.indexOf(subscription) == -1) {
-              logger.log("SubscriptionGuarantor guaranteeing " + subscription.identifier);
-              this.pendingSubscriptions.push(subscription);
+          SubscriptionGuarantor2.prototype.guarantee = function guarantee(subscription2) {
+            if (this.pendingSubscriptions.indexOf(subscription2) == -1) {
+              logger.log("SubscriptionGuarantor guaranteeing " + subscription2.identifier);
+              this.pendingSubscriptions.push(subscription2);
             } else {
-              logger.log("SubscriptionGuarantor already guaranteeing " + subscription.identifier);
+              logger.log("SubscriptionGuarantor already guaranteeing " + subscription2.identifier);
             }
             this.startGuaranteeing();
           };
-          SubscriptionGuarantor2.prototype.forget = function forget(subscription) {
-            logger.log("SubscriptionGuarantor forgetting " + subscription.identifier);
+          SubscriptionGuarantor2.prototype.forget = function forget(subscription2) {
+            logger.log("SubscriptionGuarantor forgetting " + subscription2.identifier);
             this.pendingSubscriptions = this.pendingSubscriptions.filter(function(s) {
-              return s !== subscription;
+              return s !== subscription2;
             });
           };
           SubscriptionGuarantor2.prototype.startGuaranteeing = function startGuaranteeing() {
@@ -422,9 +422,9 @@
             var _this = this;
             this.retryTimeout = setTimeout(function() {
               if (_this.subscriptions && typeof _this.subscriptions.subscribe === "function") {
-                _this.pendingSubscriptions.map(function(subscription) {
-                  logger.log("SubscriptionGuarantor resubscribing " + subscription.identifier);
-                  _this.subscriptions.subscribe(subscription);
+                _this.pendingSubscriptions.map(function(subscription2) {
+                  logger.log("SubscriptionGuarantor resubscribing " + subscription2.identifier);
+                  _this.subscriptions.subscribe(subscription2);
                 });
               }
             }, 500);
@@ -443,37 +443,37 @@
             var params = (typeof channel === "undefined" ? "undefined" : _typeof(channel)) === "object" ? channel : {
               channel
             };
-            var subscription = new Subscription(this.consumer, params, mixin);
-            return this.add(subscription);
+            var subscription2 = new Subscription(this.consumer, params, mixin);
+            return this.add(subscription2);
           };
-          Subscriptions2.prototype.add = function add(subscription) {
-            this.subscriptions.push(subscription);
+          Subscriptions2.prototype.add = function add(subscription2) {
+            this.subscriptions.push(subscription2);
             this.consumer.ensureActiveConnection();
-            this.notify(subscription, "initialized");
-            this.subscribe(subscription);
-            return subscription;
+            this.notify(subscription2, "initialized");
+            this.subscribe(subscription2);
+            return subscription2;
           };
-          Subscriptions2.prototype.remove = function remove2(subscription) {
-            this.forget(subscription);
-            if (!this.findAll(subscription.identifier).length) {
-              this.sendCommand(subscription, "unsubscribe");
+          Subscriptions2.prototype.remove = function remove2(subscription2) {
+            this.forget(subscription2);
+            if (!this.findAll(subscription2.identifier).length) {
+              this.sendCommand(subscription2, "unsubscribe");
             }
-            return subscription;
+            return subscription2;
           };
           Subscriptions2.prototype.reject = function reject(identifier) {
             var _this = this;
-            return this.findAll(identifier).map(function(subscription) {
-              _this.forget(subscription);
-              _this.notify(subscription, "rejected");
-              return subscription;
+            return this.findAll(identifier).map(function(subscription2) {
+              _this.forget(subscription2);
+              _this.notify(subscription2, "rejected");
+              return subscription2;
             });
           };
-          Subscriptions2.prototype.forget = function forget(subscription) {
-            this.guarantor.forget(subscription);
+          Subscriptions2.prototype.forget = function forget(subscription2) {
+            this.guarantor.forget(subscription2);
             this.subscriptions = this.subscriptions.filter(function(s) {
-              return s !== subscription;
+              return s !== subscription2;
             });
-            return subscription;
+            return subscription2;
           };
           Subscriptions2.prototype.findAll = function findAll(identifier) {
             return this.subscriptions.filter(function(s) {
@@ -482,8 +482,8 @@
           };
           Subscriptions2.prototype.reload = function reload() {
             var _this2 = this;
-            return this.subscriptions.map(function(subscription) {
-              return _this2.subscribe(subscription);
+            return this.subscriptions.map(function(subscription2) {
+              return _this2.subscribe(subscription2);
             });
           };
           Subscriptions2.prototype.notifyAll = function notifyAll(callbackName) {
@@ -491,38 +491,38 @@
             for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
               args[_key - 1] = arguments[_key];
             }
-            return this.subscriptions.map(function(subscription) {
-              return _this3.notify.apply(_this3, [subscription, callbackName].concat(args));
+            return this.subscriptions.map(function(subscription2) {
+              return _this3.notify.apply(_this3, [subscription2, callbackName].concat(args));
             });
           };
-          Subscriptions2.prototype.notify = function notify(subscription, callbackName) {
+          Subscriptions2.prototype.notify = function notify(subscription2, callbackName) {
             for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
               args[_key2 - 2] = arguments[_key2];
             }
             var subscriptions = void 0;
-            if (typeof subscription === "string") {
-              subscriptions = this.findAll(subscription);
+            if (typeof subscription2 === "string") {
+              subscriptions = this.findAll(subscription2);
             } else {
-              subscriptions = [subscription];
+              subscriptions = [subscription2];
             }
-            return subscriptions.map(function(subscription2) {
-              return typeof subscription2[callbackName] === "function" ? subscription2[callbackName].apply(subscription2, args) : void 0;
+            return subscriptions.map(function(subscription3) {
+              return typeof subscription3[callbackName] === "function" ? subscription3[callbackName].apply(subscription3, args) : void 0;
             });
           };
-          Subscriptions2.prototype.subscribe = function subscribe(subscription) {
-            if (this.sendCommand(subscription, "subscribe")) {
-              this.guarantor.guarantee(subscription);
+          Subscriptions2.prototype.subscribe = function subscribe(subscription2) {
+            if (this.sendCommand(subscription2, "subscribe")) {
+              this.guarantor.guarantee(subscription2);
             }
           };
           Subscriptions2.prototype.confirmSubscription = function confirmSubscription(identifier) {
             var _this4 = this;
             logger.log("Subscription confirmed " + identifier);
-            this.findAll(identifier).map(function(subscription) {
-              return _this4.guarantor.forget(subscription);
+            this.findAll(identifier).map(function(subscription2) {
+              return _this4.guarantor.forget(subscription2);
             });
           };
-          Subscriptions2.prototype.sendCommand = function sendCommand(subscription, command) {
-            var identifier = subscription.identifier;
+          Subscriptions2.prototype.sendCommand = function sendCommand(subscription2, command) {
+            var identifier = subscription2.identifier;
             return this.consumer.send({
               command,
               identifier
@@ -704,7 +704,8 @@
 
   // app/javascript/hotwire-livereload.js
   var consumer = (0, import_actioncable.createConsumer)();
-  consumer.subscriptions.create("Hotwire::Livereload::ReloadChannel", {
+  var subscription = null;
+  var createSubscription = () => consumer.subscriptions.create("Hotwire::Livereload::ReloadChannel", {
     received: hotwire_livereload_received_default,
     connected() {
       console.log("[Hotwire::Livereload] Websocket connected");
@@ -713,8 +714,14 @@
       console.log("[Hotwire::Livereload] Websocket disconnected");
     }
   });
+  subscription = createSubscription();
   document.addEventListener("turbo:load", () => {
     hotwire_livereload_scroll_position_default.restore();
     hotwire_livereload_scroll_position_default.remove();
+    if (subscription) {
+      consumer.subscriptions.remove(subscription);
+      subscription = null;
+    }
+    subscription = createSubscription();
   });
 })();
