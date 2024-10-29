@@ -15,16 +15,25 @@ end
 
 if CABLE_CONFIG_PATH.exist?
   gemfile = File.read(Rails.root.join("Gemfile"))
-  if gemfile.include?("redis")
-    say "Uncomment redis in Gemfile"
-    uncomment_lines "Gemfile", %r{gem ['"]redis['"]}
+  if gemfile.include?("solid_cable")
+    say "Uncomment solid_cable in Gemfile"
+    uncomment_lines "Gemfile", %r{gem ['"]solid_cable['"]}
   else
-    say "Add redis to Gemfile"
-    gem "redis"
+    say "Add solid_cable to Gemfile"
+    gem "solid_cable"
+    say "Change config/database.yml to create a separate connection for cable"
   end
 
-  say "Switch development cable to use redis"
-  gsub_file CABLE_CONFIG_PATH.to_s, /development:\n\s+adapter: async/, "development:\n  adapter: redis\n  url: redis://localhost:6379/1"
+  say "Switch development cable to use solid_cable"
+
+  content = <<~YAML
+    development:
+      adapter: solid_cable
+      connects_to:
+        database:
+          writing: cable
+  YAML
+  gsub_file CABLE_CONFIG_PATH, /development:\n  adapter: async\n/, content
 else
-  say 'ActionCable config file (config/cable.yml) is missing. Uncomment "gem \'redis\'" in your Gemfile and create config/cable.yml to use Hotwire Livereload.'
+  say 'ActionCable config file (config/cable.yml) is missing. Uncomment "gem \'solid_cable\'" in your Gemfile and create config/cable.yml to use Hotwire Livereload.'
 end

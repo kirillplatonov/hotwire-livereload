@@ -6,7 +6,7 @@ https://user-images.githubusercontent.com/839922/148676469-0acfa036-832e-4b40-aa
 
 ## Dependencies
 
-* [Redis](https://redis.io/)
+* [Solid Cable](https://github.com/rails/solid_cable)
 
 ## Getting started
 
