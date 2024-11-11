@@ -6,7 +6,8 @@ https://user-images.githubusercontent.com/839922/148676469-0acfa036-832e-4b40-aa
 
 ## Dependencies
 
-* [Redis](https://redis.io/)
+* [Redis](https://redis.io/) if rails '<= 7'
+* [Solid Cable](https://github.com/rails/solid_cable) if rails '>= 8'
 
 ## Getting started
 
