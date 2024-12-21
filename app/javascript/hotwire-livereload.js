@@ -2,10 +2,8 @@ import { createConsumer } from "@rails/actioncable"
 import received from "./lib/hotwire-livereload-received"
 import scrollPosition from "./lib/hotwire-livereload-scroll-position"
 
-const consumer = createConsumer()
-let subscription = null
-
-const createSubscription = () => consumer.subscriptions.create("Hotwire::Livereload::ReloadChannel", {
+const consumer = createConsumer("/hotwire-livereload")
+consumer.subscriptions.create("Hotwire::Livereload::ReloadChannel", {
   received,
 
   connected() {
@@ -17,16 +15,7 @@ const createSubscription = () => consumer.subscriptions.create("Hotwire::Liverel
   },
 })
 
-subscription = createSubscription()
-
 document.addEventListener("turbo:load", () => {
   scrollPosition.restore()
   scrollPosition.remove()
-
-  if (subscription) {
-    consumer.subscriptions.remove(subscription)
-    subscription = null
-  }
-  subscription = createSubscription()
 })
-

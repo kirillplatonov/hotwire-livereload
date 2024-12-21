@@ -1,3 +1,5 @@
+require "action_cable/server/base"
+require "hotwire/livereload/cable_server"
 require "hotwire/livereload/engine"
 
 module Hotwire

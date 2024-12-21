@@ -389,18 +389,18 @@
       this.subscriptions = subscriptions;
       this.pendingSubscriptions = [];
     }
-    guarantee(subscription2) {
-      if (this.pendingSubscriptions.indexOf(subscription2) == -1) {
-        logger.log(`SubscriptionGuarantor guaranteeing ${subscription2.identifier}`);
-        this.pendingSubscriptions.push(subscription2);
+    guarantee(subscription) {
+      if (this.pendingSubscriptions.indexOf(subscription) == -1) {
+        logger.log(`SubscriptionGuarantor guaranteeing ${subscription.identifier}`);
+        this.pendingSubscriptions.push(subscription);
       } else {
-        logger.log(`SubscriptionGuarantor already guaranteeing ${subscription2.identifier}`);
+        logger.log(`SubscriptionGuarantor already guaranteeing ${subscription.identifier}`);
       }
       this.startGuaranteeing();
     }
-    forget(subscription2) {
-      logger.log(`SubscriptionGuarantor forgetting ${subscription2.identifier}`);
-      this.pendingSubscriptions = this.pendingSubscriptions.filter((s) => s !== subscription2);
+    forget(subscription) {
+      logger.log(`SubscriptionGuarantor forgetting ${subscription.identifier}`);
+      this.pendingSubscriptions = this.pendingSubscriptions.filter((s) => s !== subscription);
     }
     startGuaranteeing() {
       this.stopGuaranteeing();
@@ -412,9 +412,9 @@
     retrySubscribing() {
       this.retryTimeout = setTimeout(() => {
         if (this.subscriptions && typeof this.subscriptions.subscribe === "function") {
-          this.pendingSubscriptions.map((subscription2) => {
-            logger.log(`SubscriptionGuarantor resubscribing ${subscription2.identifier}`);
-            this.subscriptions.subscribe(subscription2);
+          this.pendingSubscriptions.map((subscription) => {
+            logger.log(`SubscriptionGuarantor resubscribing ${subscription.identifier}`);
+            this.subscriptions.subscribe(subscription);
           });
         }
       }, 500);
@@ -431,64 +431,64 @@
       const params = typeof channel === "object" ? channel : {
         channel
       };
-      const subscription2 = new Subscription(this.consumer, params, mixin);
-      return this.add(subscription2);
+      const subscription = new Subscription(this.consumer, params, mixin);
+      return this.add(subscription);
     }
-    add(subscription2) {
-      this.subscriptions.push(subscription2);
+    add(subscription) {
+      this.subscriptions.push(subscription);
       this.consumer.ensureActiveConnection();
-      this.notify(subscription2, "initialized");
-      this.subscribe(subscription2);
-      return subscription2;
+      this.notify(subscription, "initialized");
+      this.subscribe(subscription);
+      return subscription;
     }
-    remove(subscription2) {
-      this.forget(subscription2);
-      if (!this.findAll(subscription2.identifier).length) {
-        this.sendCommand(subscription2, "unsubscribe");
+    remove(subscription) {
+      this.forget(subscription);
+      if (!this.findAll(subscription.identifier).length) {
+        this.sendCommand(subscription, "unsubscribe");
       }
-      return subscription2;
+      return subscription;
     }
     reject(identifier) {
-      return this.findAll(identifier).map((subscription2) => {
-        this.forget(subscription2);
-        this.notify(subscription2, "rejected");
-        return subscription2;
+      return this.findAll(identifier).map((subscription) => {
+        this.forget(subscription);
+        this.notify(subscription, "rejected");
+        return subscription;
       });
     }
-    forget(subscription2) {
-      this.guarantor.forget(subscription2);
-      this.subscriptions = this.subscriptions.filter((s) => s !== subscription2);
-      return subscription2;
+    forget(subscription) {
+      this.guarantor.forget(subscription);
+      this.subscriptions = this.subscriptions.filter((s) => s !== subscription);
+      return subscription;
     }
     findAll(identifier) {
       return this.subscriptions.filter((s) => s.identifier === identifier);
     }
     reload() {
-      return this.subscriptions.map((subscription2) => this.subscribe(subscription2));
+      return this.subscriptions.map((subscription) => this.subscribe(subscription));
     }
     notifyAll(callbackName, ...args) {
-      return this.subscriptions.map((subscription2) => this.notify(subscription2, callbackName, ...args));
+      return this.subscriptions.map((subscription) => this.notify(subscription, callbackName, ...args));
     }
-    notify(subscription2, callbackName, ...args) {
+    notify(subscription, callbackName, ...args) {
       let subscriptions;
-      if (typeof subscription2 === "string") {
-        subscriptions = this.findAll(subscription2);
+      if (typeof subscription === "string") {
+        subscriptions = this.findAll(subscription);
       } else {
-        subscriptions = [subscription2];
+        subscriptions = [subscription];
       }
-      return subscriptions.map((subscription3) => typeof subscription3[callbackName] === "function" ? subscription3[callbackName](...args) : void 0);
+      return subscriptions.map((subscription2) => typeof subscription2[callbackName] === "function" ? subscription2[callbackName](...args) : void 0);
     }
-    subscribe(subscription2) {
-      if (this.sendCommand(subscription2, "subscribe")) {
-        this.guarantor.guarantee(subscription2);
+    subscribe(subscription) {
+      if (this.sendCommand(subscription, "subscribe")) {
+        this.guarantor.guarantee(subscription);
       }
     }
     confirmSubscription(identifier) {
       logger.log(`Subscription confirmed ${identifier}`);
-      this.findAll(identifier).map((subscription2) => this.guarantor.forget(subscription2));
+      this.findAll(identifier).map((subscription) => this.guarantor.forget(subscription));
     }
-    sendCommand(subscription2, command) {
-      const { identifier } = subscription2;
+    sendCommand(subscription, command) {
+      const { identifier } = subscription;
       return this.consumer.send({
         command,
         identifier
@@ -587,9 +587,8 @@
   }, 300);
 
   // app/javascript/hotwire-livereload.js
-  var consumer = createConsumer();
-  var subscription = null;
-  var createSubscription = () => consumer.subscriptions.create("Hotwire::Livereload::ReloadChannel", {
+  var consumer = createConsumer("/hotwire-livereload");
+  consumer.subscriptions.create("Hotwire::Livereload::ReloadChannel", {
     received: hotwire_livereload_received_default,
     connected() {
       console.log("[Hotwire::Livereload] Websocket connected");
@@ -598,14 +597,8 @@
       console.log("[Hotwire::Livereload] Websocket disconnected");
     }
   });
-  subscription = createSubscription();
   document.addEventListener("turbo:load", () => {
     hotwire_livereload_scroll_position_default.restore();
     hotwire_livereload_scroll_position_default.remove();
-    if (subscription) {
-      consumer.subscriptions.remove(subscription);
-      subscription = null;
-    }
-    subscription = createSubscription();
   });
 })();
