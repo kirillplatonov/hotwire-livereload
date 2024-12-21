@@ -2,9 +2,9 @@ PATH
   remote: .
   specs:
     hotwire-livereload (1.4.1)
-      actioncable (>= 6.0.0)
+      actioncable (>= 7.0.0)
       listen (>= 3.0.0)
-      railties (>= 6.0.0)
+      railties (>= 7.0.0)
 
 GEM
   remote: https://rubygems.org/
