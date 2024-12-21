@@ -4,10 +4,6 @@ Automatically reload Hotwire Turbo when app files are modified.
 
 https://user-images.githubusercontent.com/839922/148676469-0acfa036-832e-4b40-aa05-1fdd945baa1f.mp4
 
-## Dependencies
-
-* [Redis](https://redis.io/)
-
 ## Getting started
 
 Add `hotwire-livereload` to your Gemfile:
