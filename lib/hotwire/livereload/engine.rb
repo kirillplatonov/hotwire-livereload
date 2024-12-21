@@ -19,6 +19,14 @@ module Hotwire
       config.hotwire_livereload.listen_options ||= {}
       config.hotwire_livereload.debounce_delay_ms = 0
 
+      initializer "hotwire_livereload.routes" do
+        config.after_initialize do |app|
+          app.routes.prepend do
+            mount Hotwire::Livereload.cable_server => "/hotwire-livereload", :internal => true, :anchor => true
+          end
+        end
+      end
+
       initializer "hotwire_livereload.assets" do
         if Rails.application.config.respond_to?(:assets)
           Rails.application.config.assets.precompile += %w[hotwire-livereload.js hotwire-livereload-turbo-stream.js]
@@ -109,8 +117,12 @@ module Hotwire
       )
     end
 
+    def self.cable_server
+      @cable_server ||= Hotwire::Livereload::CableServer.new
+    end
+
     def self.action_cable(opts)
-      ActionCable.server.broadcast("hotwire-reload", opts)
+      cable_server.broadcast("hotwire-reload", opts)
     end
 
     def self.server_process?
