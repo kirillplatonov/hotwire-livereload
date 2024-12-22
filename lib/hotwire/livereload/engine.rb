@@ -2,6 +2,7 @@ module Hotwire
   module Livereload
     class Engine < ::Rails::Engine
       isolate_namespace Hotwire::Livereload
+
       config.hotwire_livereload = ActiveSupport::OrderedOptions.new
       config.hotwire_livereload.listen_paths ||= []
       config.hotwire_livereload.skip_listen_paths ||= []
@@ -100,52 +101,6 @@ module Hotwire
       at_exit do
         if Rails.env.development?
           @listener&.stop
-        end
-      end
-    end
-
-    def self.turbo_stream(locals)
-      Turbo::StreamsChannel.broadcast_replace_to(
-        "hotwire-livereload",
-        target: "hotwire-livereload",
-        partial: "hotwire/livereload/turbo_stream",
-        locals: locals
-      )
-    end
-
-    def self.cable_server
-      @cable_server ||= Hotwire::Livereload::CableServer.new
-    end
-
-    def self.action_cable(opts)
-      cable_server.broadcast("hotwire-reload", opts)
-    end
-
-    def self.server_process?
-      puma_process = defined?(::Puma) && File.basename($0) == "puma"
-      rails_server = defined?(Rails::Server)
-
-      puma_process || rails_server
-    end
-
-    def self.debounce(wait_ms, &block)
-      if wait_ms.zero?
-        return ->(*args) { yield(*args) }
-      end
-
-      mutex = Mutex.new
-      timer_thread = nil
-      seconds = wait_ms.to_f / 1000.0
-
-      lambda do |*args|
-        mutex.synchronize do
-          # Cancel previous timer
-          timer_thread&.kill
-
-          timer_thread = Thread.new do
-            sleep(seconds)
-            yield(*args)
-          end
         end
       end
     end
