@@ -38,6 +38,10 @@ module Hotwire
         !!(puma_process || rails_server)
       end
 
+      def enabled?
+        Rails.env.development? && server_process?
+      end
+
       def debounce(wait_ms, &block)
         if wait_ms.zero?
           return ->(*args) { yield(*args) }

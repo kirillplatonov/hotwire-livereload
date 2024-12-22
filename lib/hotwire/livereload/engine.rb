@@ -17,58 +17,64 @@ module Hotwire
       config.hotwire_livereload.debounce_delay_ms = 0
 
       initializer "hotwire_livereload.routes" do
-        config.after_initialize do |app|
-          app.routes.prepend do
-            mount Hotwire::Livereload.cable_server => "/hotwire-livereload", :internal => true, :anchor => true
+        if Hotwire::Livereload.enabled?
+          config.after_initialize do |app|
+            app.routes.prepend do
+              mount Hotwire::Livereload.cable_server => "/hotwire-livereload", :internal => true, :anchor => true
+            end
           end
         end
       end
 
       initializer "hotwire_livereload.assets" do
-        if Rails.application.config.respond_to?(:assets)
+        if Hotwire::Livereload.enabled? && Rails.application.config.respond_to?(:assets)
           Rails.application.config.assets.precompile += %w[hotwire-livereload.js hotwire-livereload-turbo-stream.js]
         end
       end
 
       initializer "hotwire_livereload.helpers" do
-        ActiveSupport.on_load(:action_controller_base) do
-          helper Hotwire::Livereload::LivereloadTagsHelper
+        if Hotwire::Livereload.enabled?
+          ActiveSupport.on_load(:action_controller_base) do
+            helper Hotwire::Livereload::LivereloadTagsHelper
+          end
         end
       end
 
       initializer "hotwire_livereload.set_configs" do |app|
-        options = app.config.hotwire_livereload
-        skip_listen_paths = options.skip_listen_paths.map(&:to_s).uniq
+        if Hotwire::Livereload.enabled?
+          options = app.config.hotwire_livereload
+          skip_listen_paths = options.skip_listen_paths.map(&:to_s).uniq
 
-        unless options.disable_default_listeners
-          default_listen_paths = %w[
-            app/views
-            app/helpers
-            app/javascript
-            app/assets/stylesheets
-            app/assets/javascripts
-            app/assets/images
-            app/components
-            config/locales
-          ]
-          if defined?(Jsbundling)
-            default_listen_paths -= %w[app/javascript]
-            default_listen_paths += %w[app/assets/builds]
+          unless options.disable_default_listeners
+            default_listen_paths = %w[
+              app/views
+              app/helpers
+              app/javascript
+              app/assets/stylesheets
+              app/assets/javascripts
+              app/assets/images
+              app/components
+              config/locales
+            ]
+            if defined?(Jsbundling)
+              default_listen_paths -= %w[app/javascript]
+              default_listen_paths += %w[app/assets/builds]
+            end
+            if defined?(Cssbundling)
+              default_listen_paths -= %w[app/assets/stylesheets]
+              default_listen_paths += %w[app/assets/builds]
+            end
+            options.listen_paths += default_listen_paths
+              .uniq
+              .map { |p| Rails.root.join(p) }
+              .select { |p| Dir.exist?(p) }
+              .reject { |p| skip_listen_paths.include?(p.to_s) }
           end
-          if defined?(Cssbundling)
-            default_listen_paths -= %w[app/assets/stylesheets]
-            default_listen_paths += %w[app/assets/builds]
-          end
-          options.listen_paths += default_listen_paths
-            .uniq
-            .map { |p| Rails.root.join(p) }
-            .select { |p| Dir.exist?(p) }
-            .reject { |p| skip_listen_paths.include?(p.to_s) }
         end
       end
 
       config.after_initialize do |app|
-        if Rails.env.development? && Hotwire::Livereload.server_process?
+        if Hotwire::Livereload.enabled?
           @trigger_reload = (Hotwire::Livereload.debounce(config.hotwire_livereload.debounce_delay_ms) do |options|
             if config.hotwire_livereload.reload_method == :turbo_stream
               Hotwire::Livereload.turbo_stream(options)
@@ -99,7 +105,7 @@ module Hotwire
       end
 
       at_exit do
-        if Rails.env.development?
+        if Hotwire::Livereload.enabled?
           @listener&.stop
         end
       end
