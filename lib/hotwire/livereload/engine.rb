@@ -1,7 +1,3 @@
-require "rails"
-require "action_cable/engine"
-require "listen"
-
 module Hotwire
   module Livereload
     class Engine < ::Rails::Engine
