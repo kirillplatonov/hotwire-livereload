@@ -8,8 +8,20 @@ https://user-images.githubusercontent.com/839922/148676469-0acfa036-832e-4b40-aa
 
 Add `hotwire-livereload` to your Gemfile:
 ```
-bundle add hotwire-livereload --group development
+group :development do
+  gem "hotwire-livereload", github: "kirillplatonov/hotwire-livereload"
+end
 ```
+
+Run `bundle install` and restart your server.
+
+In your layout, make sure you don't `turbo-track` your JS/CSS in development:
+```diff
++ <%= stylesheet_link_tag "application", "data-turbo-track": Rails.env.production? ? "reload" : "" %>
+- <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+```
+
+## Configuration
 
 Folders watched by default:
 - `app/views`
@@ -22,14 +34,6 @@ Folders watched by default:
 - `config/locales`
 
 The gem detects if you use [`jsbundling-rails`](https://github.com/rails/jsbundling-rails) or [`cssbundling-rails`](https://github.com/rails/cssbundling-rails) and watches for changes in their output folder `app/assets/builds` automatically.
-
-In your layout, make sure you don't `turbo-track` your JS/CSS in development:
-```diff
-+ <%= stylesheet_link_tag "application", "data-turbo-track": Rails.env.production? ? "reload" : "" %>
-- <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-```
-
-## Configuration
 
 ### Listen paths
 
