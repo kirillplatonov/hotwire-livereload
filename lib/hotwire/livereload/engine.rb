@@ -15,7 +15,7 @@ module Hotwire
 
       initializer "hotwire_livereload.middleware" do
         if Hotwire::Livereload.enabled?
-          config.app_middleware.use Hotwire::Livereload::Middleware
+          config.app_middleware.insert_after ActionDispatch::Executor, Hotwire::Livereload::Middleware
         end
       end
 

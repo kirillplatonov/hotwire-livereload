@@ -24,7 +24,7 @@ module Hotwire
       private
 
       def html_response?(headers)
-        headers["Content-Type"]&.include?("text/html")
+        headers["content-type"]&.include?("text/html")
       end
 
       def get_response_body(response)
