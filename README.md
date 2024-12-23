@@ -11,11 +11,6 @@ Add `hotwire-livereload` to your Gemfile:
 bundle add hotwire-livereload --group development
 ```
 
-Run installer:
-```
-rails livereload:install
-```
-
 Folders watched by default:
 - `app/views`
 - `app/helpers`
@@ -95,17 +90,6 @@ Rails.application.configure do
   # ...
   config.hotwire_livereload.reload_method = :turbo_stream
 end
-```
-
-In that case you need to place `hotwire_livereload_tags` helper in your layout *after* the `<%= action_cable_meta_tag %>`.
-
-```diff
-<head>
-  ...
-  <%= action_cable_meta_tag %>
-+ <%= hotwire_livereload_tags if Rails.env.development? %>
-  ...
-</head>
 ```
 
 ### Listen options

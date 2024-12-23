@@ -1,9 +1,4 @@
 namespace :livereload do
-  desc "Install Hotwire::Livereload into the app"
-  task :install do
-    system "#{RbConfig.ruby} ./bin/rails app:template LOCATION=#{File.expand_path("../install/install.rb", __dir__)}"
-  end
-
   desc "Disable Hotwire::Livereload"
   task :disable do
     FileUtils.mkdir_p("tmp")

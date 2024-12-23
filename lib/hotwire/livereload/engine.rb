@@ -9,12 +9,15 @@ module Hotwire
       config.hotwire_livereload.force_reload_paths ||= []
       config.hotwire_livereload.reload_method = :action_cable
       config.hotwire_livereload.disable_default_listeners = false
-      config.autoload_once_paths = %W[
-        #{root}/app/channels
-        #{root}/app/helpers
-      ]
+      config.autoload_once_paths = %W[#{root}/app/channels]
       config.hotwire_livereload.listen_options ||= {}
       config.hotwire_livereload.debounce_delay_ms = 0
+
+      initializer "hotwire_livereload.middleware" do
+        if Hotwire::Livereload.enabled?
+          config.app_middleware.use Hotwire::Livereload::Middleware
+        end
+      end
 
       initializer "hotwire_livereload.routes" do
         if Hotwire::Livereload.enabled?
@@ -29,14 +32,6 @@ module Hotwire
       initializer "hotwire_livereload.assets" do
         if Hotwire::Livereload.enabled? && Rails.application.config.respond_to?(:assets)
           Rails.application.config.assets.precompile += %w[hotwire-livereload.js hotwire-livereload-turbo-stream.js]
-        end
-      end
-
-      initializer "hotwire_livereload.helpers" do
-        if Hotwire::Livereload.enabled?
-          ActiveSupport.on_load(:action_controller_base) do
-            helper Hotwire::Livereload::LivereloadTagsHelper
-          end
         end
       end
 
