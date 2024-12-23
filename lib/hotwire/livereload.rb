@@ -6,6 +6,7 @@ require "listen"
 
 # modules
 require "hotwire/livereload/cable_server"
+require "hotwire/livereload/middleware"
 require "hotwire/livereload/version"
 require "hotwire/livereload/engine"
 

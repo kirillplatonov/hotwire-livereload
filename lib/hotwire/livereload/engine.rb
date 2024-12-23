@@ -16,6 +16,12 @@ module Hotwire
       config.hotwire_livereload.listen_options ||= {}
       config.hotwire_livereload.debounce_delay_ms = 0
 
+      initializer "hotwire_livereload.middleware" do
+        if Hotwire::Livereload.enabled?
+          config.app_middleware.use Hotwire::Livereload::Middleware
+        end
+      end
+
       initializer "hotwire_livereload.routes" do
         if Hotwire::Livereload.enabled?
           config.after_initialize do |app|
