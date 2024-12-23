@@ -11,7 +11,7 @@ module Hotwire
 
         if html_response?(headers)
           body = get_response_body(response)
-          if body && body.include?("</head>")
+          if body&.include?("</head>")
             body = inject_livereload_scripts(body, request)
             headers["Content-Length"] = body.bytesize.to_s
             response = [body]
