@@ -7,13 +7,9 @@ https://user-images.githubusercontent.com/839922/148676469-0acfa036-832e-4b40-aa
 ## Getting started
 
 Add `hotwire-livereload` to your Gemfile:
+```bash
+bundle add hotwire-livereload --group development
 ```
-group :development do
-  gem "hotwire-livereload", github: "kirillplatonov/hotwire-livereload"
-end
-```
-
-Run `bundle install` and restart your server.
 
 In your layout, make sure you don't `turbo-track` your JS/CSS in development:
 ```diff
