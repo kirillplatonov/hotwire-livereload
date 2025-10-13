@@ -34,9 +34,10 @@ module Hotwire
 
       def server_process?
         puma_process = defined?(::Puma) && File.basename($0) == "puma"
+        falcon_process = defined?(::Falcon) && File.basename($0) == "falcon"
         rails_server = defined?(Rails::Server)
 
-        !!(puma_process || rails_server)
+        !!(puma_process || falcon_process || rails_server)
       end
 
       def enabled?
