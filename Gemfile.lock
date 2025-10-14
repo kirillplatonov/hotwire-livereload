@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    hotwire-livereload (2.0.0)
+    hotwire-livereload (2.1.0)
       actioncable (>= 7.0.0)
       listen (>= 3.0.0)
       railties (>= 7.0.0)
