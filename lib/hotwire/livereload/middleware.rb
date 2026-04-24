@@ -11,8 +11,8 @@ module Hotwire
 
         if html_response?(headers)
           body = get_response_body(response)
-          if body&.include?("</head>")
-            body = inject_livereload_scripts(body, request)
+          if body&.include?("</head>") && (!turbo_stream_reload_method? || body.include?("</body>"))
+            body = inject_livereload_elements(body, request)
             headers["Content-Length"] = body.bytesize.to_s
             response = [body]
           end
@@ -33,23 +33,35 @@ module Hotwire
         parts.join
       end
 
-      def inject_livereload_scripts(body, request)
-        body.sub("</head>", "#{livereload_scripts(request)}</head>")
+      def turbo_stream_reload_method?
+        Hotwire::Livereload::Engine.config.hotwire_livereload.reload_method == :turbo_stream
+      end
+
+      def inject_livereload_elements(body, request)
+        body_with_script = body.sub("</head>", "#{livereload_script(request)}</head>")
+        return body_with_script unless turbo_stream_reload_method?
+
+        body_with_script.sub("</body>", "#{livereload_turbo_cable_stream_source}</body>")
+      end
+
+      def livereload_script(request)
+        view_helpers.javascript_include_tag(livereload_script_source, defer: true, nonce: request&.content_security_policy_nonce)
       end
 
       def view_helpers
         ActionController::Base.helpers
       end
 
-      def livereload_scripts(request)
-        if Hotwire::Livereload::Engine.config.hotwire_livereload.reload_method == :turbo_stream
-          view_helpers.safe_join [
-            view_helpers.turbo_stream_from("hotwire-livereload"),
-            view_helpers.javascript_include_tag("hotwire-livereload-turbo-stream", defer: true, nonce: request&.content_security_policy_nonce)
-          ], "\n"
+      def livereload_script_source
+        if turbo_stream_reload_method?
+          "hotwire-livereload-turbo-stream"
         else
-          view_helpers.javascript_include_tag("hotwire-livereload", defer: true, nonce: request&.content_security_policy_nonce)
+          "hotwire-livereload"
         end
+      end
+
+      def livereload_turbo_cable_stream_source
+        view_helpers.turbo_stream_from("hotwire-livereload")
       end
     end
   end
