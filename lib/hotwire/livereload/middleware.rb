@@ -11,7 +11,7 @@ module Hotwire
 
         if html_response?(headers)
           body = get_response_body(response)
-          if body&.include?("</head>") && (!turbo_stream_reload_method? || body.include?("</body>"))
+          if body&.include?("</head>") && (!turbo_stream_reload_method? || body&.include?("</body>"))
             body = inject_livereload_elements(body, request)
             headers["Content-Length"] = body.bytesize.to_s
             response = [body]
