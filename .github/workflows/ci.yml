@@ -42,7 +42,8 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
       - name: Load gem
-        run: bundle exec ruby -Ilib -e 'require "hotwire/livereload"; puts "Loaded on Ruby #{RUBY_VERSION}, Rails #{Rails.version}"'
+        run: |
+          bundle exec ruby -Ilib -e 'require "hotwire/livereload"; puts "Loaded on Ruby #{RUBY_VERSION}, Rails #{Rails.version}"'
 
   javascript:
     name: JavaScript build
